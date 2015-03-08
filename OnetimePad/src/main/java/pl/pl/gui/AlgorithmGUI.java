@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pl.pl.gui;
 
 import java.io.File;
@@ -18,11 +13,8 @@ import pl.pk.onetimepad.AlgorithmOTP;
 import pl.pk.onetimepad.IAlgorithm;
 
 /**
- * Laboratorium, pon. godz 14.15
- * Zestaw nr. 3
- * Lukasz Cyran - 180519
- * Piotr Grzelak - 180553
- * Wojciech Szalapski - 180706
+ * Laboratorium, pon. godz 14.15 Zestaw nr 3 Łukasz Cyran - 180519 Piotr Grzelak
+ * - 180553 Wojciech Szałapski - 180706
  */
 public class AlgorithmGUI extends javax.swing.JFrame {
 
@@ -83,6 +75,11 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         });
 
         jButtonDecryptText.setText("Deszyfruj tekst");
+        jButtonDecryptText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDecryptTextActionPerformed(evt);
+            }
+        });
 
         jLabelOutputText.setText("Wyjście");
 
@@ -164,13 +161,13 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 File file = chooser.getSelectedFile();
                 String filePath = file.getParent();
                 String fileName = FilenameUtils.getBaseName(file.getAbsolutePath());
-                String fileExtension = FilenameUtils.getExtension(file.getAbsolutePath());                
+                String fileExtension = FilenameUtils.getExtension(file.getAbsolutePath());
                 byte[] fileContent;
                 try (FileInputStream fis = new FileInputStream(file)) {
                     fileContent = new byte[(int) file.length()];
                     fis.read(fileContent);
                 }
-                
+
                 File outputFile = new File(filePath + "/" + fileName + "_encrypted." + fileExtension);
                 FileUtils.writeByteArrayToFile(outputFile, algorithm.encrypt(fileContent));
 
@@ -187,10 +184,10 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         try {
             File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
             byte[] keyFileContent;
-                try (FileInputStream fis = new FileInputStream(keyFile)) {
-                    keyFileContent = new byte[(int) keyFile.length()];
-                    fis.read(keyFileContent);
-                }
+            try (FileInputStream fis = new FileInputStream(keyFile)) {
+                keyFileContent = new byte[(int) keyFile.length()];
+                fis.read(keyFileContent);
+            }
             algorithm.setKey(keyFileContent);
         } catch (IOException ex) {
             Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -198,9 +195,16 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz.");
     }//GEN-LAST:event_jButtonLoadKeyActionPerformed
 
-    private void saveKeyToFile() throws IOException{
+    private void jButtonDecryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptTextActionPerformed
+        String textToDecrypt = jTextAreaOutputText.getText();
+        String decryptedText = new String(algorithm.decrypt(textToDecrypt.getBytes()));
+
+        jTextAreaInputText.setText(decryptedText);
+    }//GEN-LAST:event_jButtonDecryptTextActionPerformed
+
+    private void saveKeyToFile() throws IOException {
         File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
-        FileUtils.writeByteArrayToFile(keyFile, algorithm.encrypt(algorithm.getKey()));
+        FileUtils.writeByteArrayToFile(keyFile, algorithm.getKey());
         JOptionPane.showMessageDialog(this, "Pomyślnie zapisano klucz w " + System.getProperty("user.dir") + "/key.otp");
     }
 
