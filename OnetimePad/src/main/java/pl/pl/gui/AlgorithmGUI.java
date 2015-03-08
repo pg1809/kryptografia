@@ -1,7 +1,16 @@
+/**
+ * Laboratorium, pon. godz 14.15
+ * Zestaw nr 3
+ *
+ * Łukasz Cyran - 180519
+ * Piotr Grzelak - 180553
+ * Wojciech Szałapski - 180706
+ */
 package pl.pl.gui;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,10 +21,6 @@ import org.apache.commons.io.FilenameUtils;
 import pl.pk.onetimepad.AlgorithmOTP;
 import pl.pk.onetimepad.IAlgorithm;
 
-/**
- * Laboratorium, pon. godz 14.15 Zestaw nr 3 Łukasz Cyran - 180519 Piotr Grzelak
- * - 180553 Wojciech Szałapski - 180706
- */
 public class AlgorithmGUI extends javax.swing.JFrame {
 
     /**
@@ -25,6 +30,35 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         initComponents();
         setTitle("One-time pad 6000");
         algorithm = new AlgorithmOTP();
+    }
+
+    /**
+     * Pozwól użytkownikowi wybrać plik i zwróć informacje o tym pliku.
+     *
+     * @return Informacje o pełnej nazwie pliku oraz jego zawartości.
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private FileContent retrieveFileContent() throws FileNotFoundException, IOException {
+        FileContent result = new FileContent();
+
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            result.setFilePath(file.getParent());
+            result.setFileName(FilenameUtils.getBaseName(file.getAbsolutePath()));
+            result.setFileExtension(FilenameUtils.getExtension(file.getAbsolutePath()));
+
+            FileInputStream fis = new FileInputStream(file);
+            byte[] binaryContent = new byte[(int) file.length()];
+            fis.read(binaryContent);
+
+            result.setBinaryConent(binaryContent);
+            return result;
+        }
+
+        return null;
     }
 
     /**
@@ -66,6 +100,11 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         });
 
         jButtonDecryptFile.setText("Deszyfruj plik");
+        jButtonDecryptFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDecryptFileActionPerformed(evt);
+            }
+        });
 
         jButtonEncryptText.setText("Szyfruj tekst");
         jButtonEncryptText.addActionListener(new java.awt.event.ActionListener() {
@@ -148,36 +187,36 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         jTextAreaOutputText.setText(new String(algorithm.encrypt(jTextAreaInputText.getText().getBytes())));
         try {
             saveKeyToFile();
+
         } catch (IOException ex) {
-            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButtonEncryptTextActionPerformed
 
     private void jButtonEncryptFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncryptFileActionPerformed
-        JFileChooser chooser = new JFileChooser();
-        int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                File file = chooser.getSelectedFile();
-                String filePath = file.getParent();
-                String fileName = FilenameUtils.getBaseName(file.getAbsolutePath());
-                String fileExtension = FilenameUtils.getExtension(file.getAbsolutePath());
-                byte[] fileContent;
-                try (FileInputStream fis = new FileInputStream(file)) {
-                    fileContent = new byte[(int) file.length()];
-                    fis.read(fileContent);
-                }
-
-                File outputFile = new File(filePath + "/" + fileName + "_encrypted." + fileExtension);
-                FileUtils.writeByteArrayToFile(outputFile, algorithm.encrypt(fileContent));
-
-                saveKeyToFile();
-            } catch (IOException ex) {
-                Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+        FileContent fileContent;
+        try {
+            fileContent = retrieveFileContent();
+            if (fileContent == null) {
+                return;
             }
+
+            File outputFile = new File(fileContent.getFilePath() + "/"
+                    + fileContent.getFileName() + "_encrypted." + fileContent.getFileExtension());
+
+            FileUtils.writeByteArrayToFile(outputFile, algorithm.encrypt(fileContent.getBinaryConent()));
+        } catch (IOException ex) {
+            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku");
         }
-        jTextAreaInputText.setText("");
-        jTextAreaOutputText.setText("");
+
+        try {
+            saveKeyToFile();
+        } catch (IOException ex) {
+            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas zapisu klucza");
+        }
     }//GEN-LAST:event_jButtonEncryptFileActionPerformed
 
     private void jButtonLoadKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadKeyActionPerformed
@@ -189,8 +228,10 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 fis.read(keyFileContent);
             }
             algorithm.setKey(keyFileContent);
+
         } catch (IOException ex) {
-            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz.");
     }//GEN-LAST:event_jButtonLoadKeyActionPerformed
@@ -201,6 +242,25 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
         jTextAreaInputText.setText(decryptedText);
     }//GEN-LAST:event_jButtonDecryptTextActionPerformed
+
+    private void jButtonDecryptFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptFileActionPerformed
+        FileContent fileContent;
+        try {
+            fileContent = retrieveFileContent();
+            if (fileContent == null) {
+                return;
+            }
+
+            File outputFile = new File(fileContent.getFilePath() + "/"
+                    + fileContent.getFileName().replace("_encrypted", "_decrypted.") + fileContent.getFileExtension());
+
+            FileUtils.writeByteArrayToFile(outputFile, algorithm.decrypt(fileContent.getBinaryConent()));
+            JOptionPane.showMessageDialog(this, "Plik po deszyfracji: " + outputFile.getAbsolutePath());
+        } catch (IOException ex) {
+            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku");
+        }
+    }//GEN-LAST:event_jButtonDecryptFileActionPerformed
 
     private void saveKeyToFile() throws IOException {
         File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
@@ -222,16 +282,21 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AlgorithmGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AlgorithmGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AlgorithmGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AlgorithmGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlgorithmGUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
