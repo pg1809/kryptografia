@@ -14,6 +14,14 @@ import java.security.SecureRandom;
 public class AlgorithmOTP implements IAlgorithm {
 
     private byte[] key;
+    
+    /**
+     * Metoda szyfrujaca tablice bajtow. Generowany jest losowy klucz o dlugosci
+     * tekstu wejsciowego. Nastepnie dla kazdego bitu wejscia i klucza wykonywana
+     * jest operacja XOR.
+     * @param input - wejsciowa tablica bajtow
+     * @return - zaszyfrowana tablica bajtow
+     */
 
     @Override
     public byte[] encrypt(byte[] input) {
@@ -31,10 +39,12 @@ public class AlgorithmOTP implements IAlgorithm {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public byte[] getKey() {
         return key;
     }
 
+    @Override
     public void setKey(byte[] key) {
         this.key = key;
     }

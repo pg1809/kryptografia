@@ -6,9 +6,8 @@
 package pl.pl.gui;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -19,8 +18,11 @@ import pl.pk.onetimepad.AlgorithmOTP;
 import pl.pk.onetimepad.IAlgorithm;
 
 /**
- *
- * @author Lukasz Cyran
+ * Laboratorium, pon. godz 14.15
+ * Zestaw nr. 3
+ * Lukasz Cyran - 180519
+ * Piotr Grzelak - 180553
+ * Wojciech Szalapski - 180706
  */
 public class AlgorithmGUI extends javax.swing.JFrame {
 
@@ -101,24 +103,23 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jButtonEncryptFile)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jButtonDecryptFile)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButtonLoadKey))
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabelOutputText)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(27, 27, 27)
-                                    .addComponent(jButtonEncryptText)
-                                    .addGap(91, 91, 91)
-                                    .addComponent(jButtonDecryptText))
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabelInputText))
-                            .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonEncryptFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonDecryptFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonLoadKey))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelOutputText)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(27, 27, 27)
+                                .addComponent(jButtonEncryptText)
+                                .addGap(91, 91, 91)
+                                .addComponent(jButtonDecryptText))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelInputText))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -133,7 +134,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButtonEncryptText)
                     .addComponent(jButtonDecryptText))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -160,12 +161,18 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
-                String filePath = chooser.getSelectedFile().getParent();
-                String fileName = FilenameUtils.getBaseName(chooser.getSelectedFile().getAbsolutePath());
-                String fileExtension = FilenameUtils.getExtension(chooser.getSelectedFile().getAbsolutePath());
-                String fileContent = new Scanner(chooser.getSelectedFile()).useDelimiter("\\Z").next();
+                File file = chooser.getSelectedFile();
+                String filePath = file.getParent();
+                String fileName = FilenameUtils.getBaseName(file.getAbsolutePath());
+                String fileExtension = FilenameUtils.getExtension(file.getAbsolutePath());                
+                byte[] fileContent;
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    fileContent = new byte[(int) file.length()];
+                    fis.read(fileContent);
+                }
+                
                 File outputFile = new File(filePath + "/" + fileName + "_encrypted." + fileExtension);
-                FileUtils.writeByteArrayToFile(outputFile, algorithm.encrypt(fileContent.getBytes()));
+                FileUtils.writeByteArrayToFile(outputFile, algorithm.encrypt(fileContent));
 
                 saveKeyToFile();
             } catch (IOException ex) {
@@ -178,19 +185,23 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
     private void jButtonLoadKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadKeyActionPerformed
         try {
-            File keyFile = new File(System.getProperty("user.dir") + "/key.txt");
-            String keyFileContent = new Scanner(keyFile).useDelimiter("\\Z").next();
-            algorithm.setKey(keyFileContent.getBytes());
-        } catch (FileNotFoundException ex) {
+            File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
+            byte[] keyFileContent;
+                try (FileInputStream fis = new FileInputStream(keyFile)) {
+                    keyFileContent = new byte[(int) keyFile.length()];
+                    fis.read(keyFileContent);
+                }
+            algorithm.setKey(keyFileContent);
+        } catch (IOException ex) {
             Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz: " + new String(algorithm.getKey()));
+        JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz.");
     }//GEN-LAST:event_jButtonLoadKeyActionPerformed
 
     private void saveKeyToFile() throws IOException{
-        File keyFile = new File(System.getProperty("user.dir") + "/key.txt");
+        File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
         FileUtils.writeByteArrayToFile(keyFile, algorithm.encrypt(algorithm.getKey()));
-        JOptionPane.showMessageDialog(this, "Pomyślnie zapisano klucz w " + System.getProperty("user.dir") + "/key.txt");
+        JOptionPane.showMessageDialog(this, "Pomyślnie zapisano klucz w " + System.getProperty("user.dir") + "/key.otp");
     }
 
     /**
