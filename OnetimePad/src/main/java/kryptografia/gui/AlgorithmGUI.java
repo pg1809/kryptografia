@@ -90,6 +90,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane2 = new javax.swing.JScrollPane();
+        encryptedTextArea1 = new kryptografia.gui.EncryptedTextArea();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaInputText = new javax.swing.JTextArea();
         jButtonEncryptFile = new javax.swing.JButton();
@@ -99,8 +101,12 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         jLabelOutputText = new javax.swing.JLabel();
         jLabelInputText = new javax.swing.JLabel();
         jButtonLoadKey = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        jScrollPane4 = new javax.swing.JScrollPane();
         jTextAreaOutputText = new kryptografia.gui.EncryptedTextArea();
+
+        encryptedTextArea1.setColumns(20);
+        encryptedTextArea1.setRows(5);
+        jScrollPane2.setViewportView(encryptedTextArea1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -149,7 +155,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
         jTextAreaOutputText.setColumns(20);
         jTextAreaOutputText.setRows(5);
-        jScrollPane3.setViewportView(jTextAreaOutputText);
+        jScrollPane4.setViewportView(jTextAreaOutputText);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -158,6 +164,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonEncryptFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -165,15 +172,14 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonLoadKey))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jScrollPane3)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabelOutputText, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGap(27, 27, 27)
                                 .addComponent(jButtonEncryptText)
                                 .addGap(91, 91, 91)
                                 .addComponent(jButtonDecryptText))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelInputText, javax.swing.GroupLayout.Alignment.LEADING))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -187,7 +193,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                     .addComponent(jButtonLoadKey))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelInputText)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -195,8 +201,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                     .addComponent(jButtonDecryptText))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabelOutputText)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -339,6 +345,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private IAlgorithm algorithm;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private kryptografia.gui.EncryptedTextArea encryptedTextArea1;
     private javax.swing.JButton jButtonDecryptFile;
     private javax.swing.JButton jButtonDecryptText;
     private javax.swing.JButton jButtonEncryptFile;
@@ -347,7 +354,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelInputText;
     private javax.swing.JLabel jLabelOutputText;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea jTextAreaInputText;
     private kryptografia.gui.EncryptedTextArea jTextAreaOutputText;
     // End of variables declaration//GEN-END:variables
