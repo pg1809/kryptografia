@@ -1,9 +1,9 @@
 /**
- * Laboratorium, pon. godz 14.15
+ * Laboratorium, pon. godz 14.15 
  * Zestaw nr 3
  *
- * Łukasz Cyran - 180519
- * Piotr Grzelak - 180553
+ * Łukasz Cyran - 180519 
+ * Piotr Grzelak - 180553 
  * Wojciech Szałapski - 180706
  */
 package pl.pl.gui;
@@ -59,6 +59,23 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         }
 
         return null;
+    }
+
+    /**
+     * Pozwól użytkownikowi wybrać plik i zapisz bajty do niego.
+     * 
+     * @param byteArray Tablica bajtów do zapisania
+     * @throws IOException 
+     */
+    private void saveByteArrayToFile(byte[] byteArray) throws IOException {
+        File file = null;
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+        }
+        FileUtils.writeByteArrayToFile(file, byteArray);
+        JOptionPane.showMessageDialog(this, "Pomyślnie zapisano plik");
     }
 
     /**
@@ -186,11 +203,13 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private void jButtonEncryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncryptTextActionPerformed
         jTextAreaOutputText.setText(new String(algorithm.encrypt(jTextAreaInputText.getText().getBytes())));
         try {
-            saveKeyToFile();
+            JOptionPane.showMessageDialog(this, "Wybierz gdzie zapisać klucz");
+            saveByteArrayToFile(algorithm.getKey());
+            algorithm.setKey(null);
 
         } catch (IOException ex) {
-            Logger.getLogger(AlgorithmGUI.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas zapisu klucza");
         }
     }//GEN-LAST:event_jButtonEncryptTextActionPerformed
 
@@ -212,7 +231,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         }
 
         try {
-            saveKeyToFile();
+            JOptionPane.showMessageDialog(this, "Wybierz gdzie zapisać klucz");
+            saveByteArrayToFile(algorithm.getKey());
+            algorithm.setKey(null);
         } catch (IOException ex) {
             Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas zapisu klucza");
@@ -221,52 +242,52 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
     private void jButtonLoadKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadKeyActionPerformed
         try {
-            File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
-            byte[] keyFileContent;
-            try (FileInputStream fis = new FileInputStream(keyFile)) {
-                keyFileContent = new byte[(int) keyFile.length()];
-                fis.read(keyFileContent);
-            }
-            algorithm.setKey(keyFileContent);
+            FileContent keyFileContent = retrieveFileContent();
+            byte[] binaryKeyFileContent = keyFileContent.getBinaryConent();
+            algorithm.setKey(binaryKeyFileContent);
+            JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz");
 
         } catch (IOException ex) {
-            Logger.getLogger(AlgorithmGUI.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
-        JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz.");
+            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania klucza");
+        }        
     }//GEN-LAST:event_jButtonLoadKeyActionPerformed
 
     private void jButtonDecryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptTextActionPerformed
-        String textToDecrypt = jTextAreaOutputText.getText();
-        String decryptedText = new String(algorithm.decrypt(textToDecrypt.getBytes()));
+        if(algorithm.getKey() != null){
+            String textToDecrypt = jTextAreaOutputText.getText();
+            String decryptedText = new String(algorithm.decrypt(textToDecrypt.getBytes()));
 
-        jTextAreaInputText.setText(decryptedText);
+            jTextAreaInputText.setText(decryptedText);
+        }
+        else{
+            JOptionPane.showMessageDialog(this, "Proszę najpierw wczytać klucz");
+        }
     }//GEN-LAST:event_jButtonDecryptTextActionPerformed
 
     private void jButtonDecryptFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptFileActionPerformed
-        FileContent fileContent;
-        try {
-            fileContent = retrieveFileContent();
-            if (fileContent == null) {
-                return;
+        if(algorithm.getKey() != null){
+            FileContent fileContent;
+            try {
+                fileContent = retrieveFileContent();
+                if (fileContent == null) {
+                    return;
+                }
+
+                File outputFile = new File(fileContent.getFilePath() + "/"
+                        + fileContent.getFileName().replace("_encrypted", "_decrypted.") + fileContent.getFileExtension());
+
+                FileUtils.writeByteArrayToFile(outputFile, algorithm.decrypt(fileContent.getBinaryConent()));
+                JOptionPane.showMessageDialog(this, "Plik po deszyfracji: " + outputFile.getAbsolutePath());
+            } catch (IOException ex) {
+                Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku");
             }
-
-            File outputFile = new File(fileContent.getFilePath() + "/"
-                    + fileContent.getFileName().replace("_encrypted", "_decrypted.") + fileContent.getFileExtension());
-
-            FileUtils.writeByteArrayToFile(outputFile, algorithm.decrypt(fileContent.getBinaryConent()));
-            JOptionPane.showMessageDialog(this, "Plik po deszyfracji: " + outputFile.getAbsolutePath());
-        } catch (IOException ex) {
-            Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku");
+        }
+        else{
+            JOptionPane.showMessageDialog(this, "Proszę najpierw wczytać klucz");
         }
     }//GEN-LAST:event_jButtonDecryptFileActionPerformed
-
-    private void saveKeyToFile() throws IOException {
-        File keyFile = new File(System.getProperty("user.dir") + "/key.otp");
-        FileUtils.writeByteArrayToFile(keyFile, algorithm.getKey());
-        JOptionPane.showMessageDialog(this, "Pomyślnie zapisano klucz w " + System.getProperty("user.dir") + "/key.otp");
-    }
 
     /**
      * @param args the command line arguments
