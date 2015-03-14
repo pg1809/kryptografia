@@ -6,7 +6,7 @@
  * Piotr Grzelak - 180553
  * Wojciech Szałapski - 180706
  */
-package pl.pl.gui;
+package kryptografia.gui;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,8 +18,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import pl.pk.onetimepad.AlgorithmOTP;
-import pl.pk.onetimepad.IAlgorithm;
+import kryptografia.pk.onetimepad.AlgorithmOTP;
+import kryptografia.pk.onetimepad.IAlgorithm;
 
 public class AlgorithmGUI extends javax.swing.JFrame {
 
@@ -92,8 +92,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaInputText = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextAreaOutputText = new javax.swing.JTextArea();
         jButtonEncryptFile = new javax.swing.JButton();
         jButtonDecryptFile = new javax.swing.JButton();
         jButtonEncryptText = new javax.swing.JButton();
@@ -101,16 +99,14 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         jLabelOutputText = new javax.swing.JLabel();
         jLabelInputText = new javax.swing.JLabel();
         jButtonLoadKey = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextAreaOutputText = new kryptografia.gui.EncryptedTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jTextAreaInputText.setColumns(20);
         jTextAreaInputText.setRows(5);
         jScrollPane1.setViewportView(jTextAreaInputText);
-
-        jTextAreaOutputText.setColumns(20);
-        jTextAreaOutputText.setRows(5);
-        jScrollPane2.setViewportView(jTextAreaOutputText);
 
         jButtonEncryptFile.setText("Szyfruj plik");
         jButtonEncryptFile.addActionListener(new java.awt.event.ActionListener() {
@@ -151,6 +147,10 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             }
         });
 
+        jTextAreaOutputText.setColumns(20);
+        jTextAreaOutputText.setRows(5);
+        jScrollPane3.setViewportView(jTextAreaOutputText);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -158,7 +158,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonEncryptFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -166,15 +165,16 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonLoadKey))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelOutputText)
-                            .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jScrollPane3)
+                            .addComponent(jLabelOutputText, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGap(27, 27, 27)
                                 .addComponent(jButtonEncryptText)
                                 .addGap(91, 91, 91)
                                 .addComponent(jButtonDecryptText))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelInputText))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                            .addComponent(jLabelInputText, javax.swing.GroupLayout.Alignment.LEADING))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -196,7 +196,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabelOutputText)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -204,12 +204,16 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonEncryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncryptTextActionPerformed
-        jTextAreaOutputText.setText(new String(algorithm.encrypt(jTextAreaInputText.getText().getBytes())));
+        byte[] bytesToEncrypt = jTextAreaInputText.getText().getBytes();
+        byte[] encryptedBytes = algorithm.encrypt(bytesToEncrypt);
+
+        jTextAreaOutputText.setText(new String(encryptedBytes));
+        jTextAreaOutputText.setInternalBuffer(encryptedBytes);
+
         try {
             JOptionPane.showMessageDialog(this, "Wybierz gdzie zapisać klucz");
             saveByteArrayToFile(algorithm.getKey());
             algorithm.setKey(null);
-
         } catch (IOException ex) {
             Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas zapisu klucza");
@@ -262,10 +266,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
     private void jButtonDecryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptTextActionPerformed
         if (algorithm.getKey() != null) {
-            String textToDecrypt = jTextAreaOutputText.getText();
-            String decryptedText = new String(algorithm.decrypt(textToDecrypt.getBytes()));
-
-            jTextAreaInputText.setText(decryptedText);
+            byte[] bytesToDecrypt = jTextAreaOutputText.getInternalBuffer();
+            jTextAreaInputText.setText(new String(algorithm.decrypt(bytesToDecrypt)));
         } else {
             JOptionPane.showMessageDialog(this, "Proszę najpierw wczytać klucz");
         }
@@ -345,8 +347,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelInputText;
     private javax.swing.JLabel jLabelOutputText;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea jTextAreaInputText;
-    private javax.swing.JTextArea jTextAreaOutputText;
+    private kryptografia.gui.EncryptedTextArea jTextAreaOutputText;
     // End of variables declaration//GEN-END:variables
 }

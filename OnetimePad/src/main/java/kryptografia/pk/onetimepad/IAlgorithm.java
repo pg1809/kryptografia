@@ -1,4 +1,4 @@
-package pl.pk.onetimepad;
+package kryptografia.pk.onetimepad;
 
 /**
  *

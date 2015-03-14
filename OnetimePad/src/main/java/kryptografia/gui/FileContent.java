@@ -1,4 +1,4 @@
-package pl.pl.gui;
+package kryptografia.gui;
 
 /**
  *
