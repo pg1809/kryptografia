@@ -1,9 +1,9 @@
 /**
- * Laboratorium, pon. godz 14.15 
+ * Laboratorium, pon. godz 14.15
  * Zestaw nr 3
  *
- * Łukasz Cyran - 180519 
- * Piotr Grzelak - 180553 
+ * Łukasz Cyran - 180519
+ * Piotr Grzelak - 180553
  * Wojciech Szałapski - 180706
  */
 package pl.pl.gui;
@@ -30,6 +30,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         initComponents();
         setTitle("One-time pad 6000");
         algorithm = new AlgorithmOTP();
+
+        jTextAreaInputText.setLineWrap(true);
+        jTextAreaOutputText.setLineWrap(true);
     }
 
     /**
@@ -63,9 +66,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
     /**
      * Pozwól użytkownikowi wybrać plik i zapisz bajty do niego.
-     * 
+     *
      * @param byteArray Tablica bajtów do zapisania
-     * @throws IOException 
+     * @throws IOException
      */
     private void saveByteArrayToFile(byte[] byteArray) throws IOException {
         File file = null;
@@ -73,9 +76,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             file = chooser.getSelectedFile();
+            FileUtils.writeByteArrayToFile(file, byteArray);
+            JOptionPane.showMessageDialog(this, "Pomyślnie zapisano plik");
         }
-        FileUtils.writeByteArrayToFile(file, byteArray);
-        JOptionPane.showMessageDialog(this, "Pomyślnie zapisano plik");
     }
 
     /**
@@ -243,6 +246,10 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private void jButtonLoadKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadKeyActionPerformed
         try {
             FileContent keyFileContent = retrieveFileContent();
+            if (keyFileContent == null) {
+                return;
+            }
+
             byte[] binaryKeyFileContent = keyFileContent.getBinaryConent();
             algorithm.setKey(binaryKeyFileContent);
             JOptionPane.showMessageDialog(this, "Pomyślnie wczytano klucz");
@@ -250,23 +257,22 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania klucza");
-        }        
+        }
     }//GEN-LAST:event_jButtonLoadKeyActionPerformed
 
     private void jButtonDecryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptTextActionPerformed
-        if(algorithm.getKey() != null){
+        if (algorithm.getKey() != null) {
             String textToDecrypt = jTextAreaOutputText.getText();
             String decryptedText = new String(algorithm.decrypt(textToDecrypt.getBytes()));
 
             jTextAreaInputText.setText(decryptedText);
-        }
-        else{
+        } else {
             JOptionPane.showMessageDialog(this, "Proszę najpierw wczytać klucz");
         }
     }//GEN-LAST:event_jButtonDecryptTextActionPerformed
 
     private void jButtonDecryptFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDecryptFileActionPerformed
-        if(algorithm.getKey() != null){
+        if (algorithm.getKey() != null) {
             FileContent fileContent;
             try {
                 fileContent = retrieveFileContent();
@@ -283,8 +289,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 Logger.getLogger(AlgorithmGUI.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku");
             }
-        }
-        else{
+        } else {
             JOptionPane.showMessageDialog(this, "Proszę najpierw wczytać klucz");
         }
     }//GEN-LAST:event_jButtonDecryptFileActionPerformed
