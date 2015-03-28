@@ -73,7 +73,7 @@ public class BytesToBigNumsConverter {
         for (int i = 0; i < BigNum.BLOCKS; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
-                block += bytes[currentByte] << (24 - 8 * j);
+                block |= (bytes[currentByte] & 0xFF) << (24 - 8 * j);
                 ++currentByte;
             }
             result.replaceBlock(i, block);
