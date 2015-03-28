@@ -17,9 +17,9 @@ public class BigNum {
     /**
      * Number of 32 bit blocks.
      *
-     * 16 blocks = 512 bits
+     * 8 blocks = 256 bits
      */
-    private static final int BLOCKS = 16;
+    private static final int BLOCKS = 8;
 
     /**
      * Binary representation of the number.

@@ -23,10 +23,10 @@ public class App {
         q.randomize(4);
         
         // p and q now gives 3 modulo 4
-        p.setBit(510, 1);
-        p.setBit(511, 1);
-        q.setBit(510, 1);
-        q.setBit(511, 1);
+        p.setBit(254, 1);
+        p.setBit(255, 1);
+        q.setBit(254, 1);
+        q.setBit(255, 1);
         
         System.out.println(p);
         System.out.println(q);
