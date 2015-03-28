@@ -5,7 +5,10 @@
  */
 package pl.kryptografia.rabin.ui;
 
+import java.util.Arrays;
+import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
+import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 /**
  *
@@ -13,6 +16,8 @@ import pl.kryptografia.rabin.bignum.BigNum;
  */
 public class App {
 
+    private static final Random generator = new Random();
+    
     public static void main(String[] args) {
         // p and q are factors of the public key
         BigNum p = new BigNum();
@@ -28,11 +33,17 @@ public class App {
         q.setBit(254, 1);
         q.setBit(255, 1);
         
-        System.out.println(p);
-        System.out.println(q);
-        
         // the public key is a product of p and q
         BigNum publicKey = BigNum.multiply(p, q);
-        System.out.println(publicKey);
+        
+        byte[] bytes = new byte[111];
+        generator.nextBytes(bytes);
+        
+        BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
+        BigNum[] plainText = converter.convert();
+        
+        for (BigNum num : plainText) {
+            System.out.println(num);
+        }
     }
 }

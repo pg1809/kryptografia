@@ -12,14 +12,14 @@ public class BigNum {
     /**
      * Block size in bits.
      */
-    private static final int BLOCK_SIZE = 32;
+    public static final int BLOCK_SIZE = 32;
 
     /**
      * Number of 32 bit blocks.
      *
      * 8 blocks = 256 bits
      */
-    private static final int BLOCKS = 8;
+    public static final int BLOCKS = 8;
 
     /**
      * Binary representation of the number.
@@ -187,5 +187,15 @@ public class BigNum {
      */
     public long getBlock(int blockNumber) {
         return number[blockNumber];
+    }
+    
+    /**
+     * Replaces a block with given value.
+     * 
+     * @param blockNumber Number of block to replace (numbered from 0).
+     * @param value New value of the block.
+     */
+    public void replaceBlock(int blockNumber, long value) {
+        number[blockNumber] = value;
     }
 }
