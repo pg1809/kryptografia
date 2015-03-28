@@ -134,6 +134,22 @@ public class BigNum {
     }
 
     /**
+     * Divides this number modulo given big number.
+     *
+     * @param modulus Modulus.
+     */
+    public void modulo(BigNum modulus) {
+        BigNum x = new BigNum(modulus);
+
+        while (greaterOrEqualTo(x)) {
+            int shift = findMaximumLeftShift(x);
+            x.shiftLeft(shift);
+
+            subtract(x);
+        }
+    }
+
+    /**
      * Fills given number of least significant blocks with random bits and the
      * rest of blocks with zeros.
      *

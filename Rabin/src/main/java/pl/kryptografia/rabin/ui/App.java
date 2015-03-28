@@ -41,13 +41,16 @@ public class App {
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
-
-        System.out.println(plainText[0]);
-        System.out.println(plainText[1]);
-        System.out.println(plainText[2]);
-        System.out.println(plainText[3]);
-
-        for (int i = 0; i < 4; ++i) {
+        
+        BigNum[] cipherText = new BigNum[plainText.length];
+        for (BigNum plainCharacter : plainText) {
+            BigNum x = new BigNum(plainCharacter);
+            System.out.println(x);
+            x = BigNum.multiply(x, x);
+            System.out.println(x);
+            x.modulo(publicKey);
+            System.out.println(x);
+            System.out.println("");
         }
     }
 }

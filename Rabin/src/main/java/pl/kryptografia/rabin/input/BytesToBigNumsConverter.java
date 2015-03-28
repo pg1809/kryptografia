@@ -16,7 +16,7 @@ public class BytesToBigNumsConverter {
     /**
      * Bytes needed to create one chunk of input data.
      */
-    private final static int BYTES_PER_CHUNK = BYTES_PER_BLOCK * BigNum.BLOCKS;
+    private final static int BYTES_PER_CHUNK = BYTES_PER_BLOCK * (BigNum.BLOCKS - 1);
 
     /**
      * Bytes to convert (padded with zeros if needed).
@@ -70,7 +70,7 @@ public class BytesToBigNumsConverter {
         
         int currentByte = index * BYTES_PER_CHUNK;
         
-        for (int i = 0; i < BigNum.BLOCKS; ++i) {
+        for (int i = 1; i < BigNum.BLOCKS; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                 block |= (bytes[currentByte] & 0xFF) << (24 - 8 * j);
