@@ -42,9 +42,5 @@ public class App {
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
-
-        for (BigNum num : plainText) {
-            System.out.print(num);
-        }
     }
 }

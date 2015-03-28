@@ -90,6 +90,43 @@ public class BigNum {
     }
 
     /**
+     * Decreases a big number by given value (works only if the result is
+     * non-negative.
+     *
+     * @param x Value to subtract from this number.
+     */
+    public void subtract(BigNum x) {
+        byte[] minuend = binaryRepresentation();
+        byte[] subtrahent = x.binaryRepresentation();
+        byte[] result = new byte[minuend.length];
+
+        byte borrowed = 0;
+        for (int i = minuend.length - 1; i >= 0; --i) {
+            minuend[i] -= borrowed;
+            minuend[i] -= subtrahent[i];
+
+            switch (minuend[i]) {
+                case -2:
+                    result[i] = 0;
+                    borrowed = 1;
+                    break;
+                case -1:
+                    result[i] = 1;
+                    borrowed = 1;
+                    break;
+                default:
+                    result[i] = minuend[i];
+                    borrowed = 0;
+                    break;
+            }
+        }
+
+        for (int i = 0; i < result.length; ++i) {
+            setBit(i, result[i]);
+        }
+    }
+
+    /**
      * Fills given number of least significant blocks with random bits and the
      * rest of blocks with zeros.
      *
@@ -113,7 +150,7 @@ public class BigNum {
     public void setBit(int position, int value) {
         int block = position / 32;
         int positionInBlock = position % 32;
-        
+
         if (value == 1) {
             number[block] |= (1 << (BLOCK_SIZE - positionInBlock - 1));
         } else if (value == 0) {
@@ -140,18 +177,35 @@ public class BigNum {
         return (x << 32) >>> 32;
     }
 
+    /**
+     * Returns a binary representation of BigNum as an array of bytes.
+     *
+     * @return Binary representation of BigNum in the form of an array of bytes.
+     */
+    private byte[] binaryRepresentation() {
+        byte[] result = new byte[BLOCKS * BLOCK_SIZE];
+
+        int counter = 0;
+        for (int i = 0; i < BLOCKS; ++i) {
+            for (int j = BLOCK_SIZE - 1; j >= 0; --j) {
+                if ((number[i] & (1 << j)) != 0) {
+                    result[counter++] = 1;
+                } else {
+                    result[counter++] = 0;
+                }
+            }
+        }
+
+        return result;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < BLOCKS; ++i) {
-            for (int j = BLOCK_SIZE - 1; j >= 0; --j) {
-                if ((number[i] & (1 << j)) != 0) {
-                    builder.append('1');
-                } else {
-                    builder.append('0');
-                }
-            }
+        byte[] binaryRepresentation = binaryRepresentation();
+        for (byte b : binaryRepresentation) {
+            builder.append(b);
         }
 
         return builder.toString();
@@ -173,10 +227,7 @@ public class BigNum {
             return false;
         }
         final BigNum other = (BigNum) obj;
-        if (!Arrays.equals(this.number, other.number)) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(this.number, other.number);
     }
 
     /**
@@ -188,10 +239,10 @@ public class BigNum {
     public long getBlock(int blockNumber) {
         return number[blockNumber];
     }
-    
+
     /**
      * Replaces a block with given value.
-     * 
+     *
      * @param blockNumber Number of block to replace (numbered from 0).
      * @param value New value of the block.
      */
