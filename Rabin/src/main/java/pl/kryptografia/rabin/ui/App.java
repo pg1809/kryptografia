@@ -45,12 +45,8 @@ public class App {
         BigNum[] cipherText = new BigNum[plainText.length];
         for (BigNum plainCharacter : plainText) {
             BigNum x = new BigNum(plainCharacter);
-            System.out.println(x);
             x = BigNum.multiply(x, x);
-            System.out.println(x);
             x.modulo(publicKey);
-            System.out.println(x);
-            System.out.println("");
         }
     }
 }

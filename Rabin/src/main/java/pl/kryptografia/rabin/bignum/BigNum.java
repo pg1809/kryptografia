@@ -241,6 +241,25 @@ public class BigNum {
     }
 
     /**
+     * Shifts the number right by given number of bits (unsigned shift).
+     *
+     * @param bias Number of bits by which this number should be shifted.
+     */
+    public void shiftRight(int bias) {
+        byte[] binaryRepresentation = binaryRepresentation();
+
+        for (int i = binaryRepresentation.length - 1; i >= bias; --i) {
+            binaryRepresentation[i] = binaryRepresentation[i - bias];
+        }
+
+        for (int i = 0; i < bias; ++i) {
+            binaryRepresentation[i] = 0;
+        }
+
+        fillFromBinaryRepresentation(binaryRepresentation);
+    }
+
+    /**
      * Fills this number content with given binary representation.
      *
      * @param binaryRepresentation Binary representation of the BigNum.
