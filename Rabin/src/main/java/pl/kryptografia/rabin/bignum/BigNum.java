@@ -121,9 +121,7 @@ public class BigNum {
             }
         }
 
-        for (int i = 0; i < result.length; ++i) {
-            setBit(i, result[i]);
-        }
+        fillFromBinaryRepresentation(result);
     }
 
     /**
@@ -155,6 +153,36 @@ public class BigNum {
             number[block] |= (1 << (BLOCK_SIZE - positionInBlock - 1));
         } else if (value == 0) {
             number[block] &= ~(1 << (BLOCK_SIZE - positionInBlock - 1));
+        }
+    }
+
+    /**
+     * Shifts this number left by given number of bits.
+     *
+     * @param bias Number of bits by which this number should be shifted.
+     */
+    private void shiftLeft(int bias) {
+        byte[] binaryRepresentation = binaryRepresentation();
+
+        for (int i = 0; i < binaryRepresentation.length - bias; ++i) {
+            binaryRepresentation[i] = binaryRepresentation[i + bias];
+        }
+
+        for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
+            binaryRepresentation[i] = 0;
+        }
+        
+        fillFromBinaryRepresentation(binaryRepresentation);
+    }
+
+    /**
+     * Fills this number content with given binary representation.
+     *
+     * @param binaryRepresentation Binary representation of the BigNum.
+     */
+    private void fillFromBinaryRepresentation(byte[] binaryRepresentation) {
+        for (int i = 0; i < binaryRepresentation.length; ++i) {
+            setBit(i, binaryRepresentation[i]);
         }
     }
 
@@ -197,6 +225,27 @@ public class BigNum {
         }
 
         return result;
+    }
+
+    /**
+     * Checks if this number is greater or equal to given number.
+     *
+     * @param x Number to compare with.
+     * @return True if and only if this number is not less than given number.
+     */
+    private boolean greaterOrEqualTo(BigNum x) {
+        byte[] me = binaryRepresentation();
+        byte[] other = x.binaryRepresentation();
+
+        for (int i = 0; i < me.length; ++i) {
+            if (me[i] < other[i]) {
+                return false;
+            } else if (me[i] > other[i]) {
+                return true;
+            }
+        }
+
+        return true;
     }
 
     @Override

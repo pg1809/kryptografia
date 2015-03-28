@@ -5,7 +5,6 @@
  */
 package pl.kryptografia.rabin.ui;
 
-import java.util.Arrays;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
@@ -42,5 +41,15 @@ public class App {
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
+
+        System.out.println(plainText[0]);
+        System.out.println(plainText[1]);
+        System.out.println(plainText[2]);
+        System.out.println(plainText[3]);
+
+        for (int i = 0; i < 4; ++i) {
+//            plainText[i].shiftLeft(i);
+//            System.out.println(plainText[i]);
+        }
     }
 }
