@@ -53,6 +53,15 @@ public class BigNum {
     }
 
     /**
+     * Creates a big number identical to given big number.
+     *
+     * @param pattern Big number to be duplicated.
+     */
+    public BigNum(BigNum pattern) {
+        fillFromBinaryRepresentation(pattern.binaryRepresentation());
+    }
+
+    /**
      * Multiplies two numbers with half a maximum least significant bits.
      *
      * @param a Multiplicand.
@@ -157,6 +166,46 @@ public class BigNum {
     }
 
     /**
+     * Returns bit value on given position.
+     *
+     * @param position Bit position (numbered from 0).
+     * @return Bit value.
+     */
+    private byte getBit(int position) {
+        int block = position / 32;
+        int positionInBlock = position % 32;
+
+        if ((number[block] & (1 << (BLOCK_SIZE - positionInBlock - 1))) != 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Finds maximum left shift of x so that it does not exceed this number.
+     *
+     * @param x The number to be shifted.
+     * @return Maximum shift (or -1 if x is greater than this number).
+     */
+    private int findMaximumLeftShift(BigNum x) {
+        int shift = -1;
+
+        BigNum xCopy = new BigNum(x);
+
+        while (greaterOrEqualTo(xCopy)) {
+            ++shift;
+
+            if (xCopy.getBit(0) == 1) {
+                return shift;
+            }
+            xCopy.shiftLeft(1);
+        }
+
+        return shift;
+    }
+
+    /**
      * Shifts this number left by given number of bits.
      *
      * @param bias Number of bits by which this number should be shifted.
@@ -171,7 +220,7 @@ public class BigNum {
         for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
             binaryRepresentation[i] = 0;
         }
-        
+
         fillFromBinaryRepresentation(binaryRepresentation);
     }
 

@@ -48,8 +48,6 @@ public class App {
         System.out.println(plainText[3]);
 
         for (int i = 0; i < 4; ++i) {
-//            plainText[i].shiftLeft(i);
-//            System.out.println(plainText[i]);
         }
     }
 }
