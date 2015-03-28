@@ -3,10 +3,6 @@ package pl.kryptografia.rabin.bignum;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-/**
- *
- * @author Wojciech Szałapski
- */
 public class BigNum {
 
     /**
@@ -62,22 +58,21 @@ public class BigNum {
     }
 
     /**
-     * Multiplies two numbers with half a maximum least significant bits.
+     * Multiplies two big numbers with half a maximum least significant bits.
      *
-     * @param a Multiplicand.
-     * @param b Multiplier.
+     * @param x Multiplier.
      * @return Result of the multiplication.
      */
-    public static BigNum multiply(BigNum a, BigNum b) {
+    public BigNum multiply(BigNum x) {
         BigNum result = new BigNum();
 
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
-                long product = a.number[i] * b.number[j];
+                long product = number[i] * x.number[j];
                 int position = i + j - BLOCKS;
 
-                BigNum c = new BigNum(product, position);
-                result.add(c);
+                BigNum y = new BigNum(product, position);
+                result.add(y);
             }
         }
 
@@ -150,6 +145,17 @@ public class BigNum {
     }
 
     /**
+     * Raises this number to given power and divides the result modulo another
+     * given number.
+     *
+     * @param exponent Exponent.
+     * @param modulus Modulus.
+     */
+    public void powerModulo(BigNum exponent, BigNum modulus) {
+        modulo(modulus);
+    }
+
+    /**
      * Fills given number of least significant blocks with random bits and the
      * rest of blocks with zeros.
      *
@@ -196,6 +202,15 @@ public class BigNum {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Checks if this number is odd.
+     *
+     * @return True if and only if this number is odd.
+     */
+    private boolean isOdd() {
+        return (number[BLOCKS - 1] & 1) != 0;
     }
 
     /**

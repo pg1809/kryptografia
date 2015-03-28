@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pl.kryptografia.rabin.ui;
 
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
-/**
- *
- * @author Wojciech Szałapski
- */
 public class App {
 
     private static final Random generator = new Random();
@@ -33,7 +24,8 @@ public class App {
         q.setBit(255, 1);
 
         // the public key is a product of p and q
-        BigNum publicKey = BigNum.multiply(p, q);
+        BigNum publicKey = new BigNum(p);
+        publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
         byte[] bytes = new byte[111];
@@ -41,12 +33,29 @@ public class App {
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
-        
+
+        // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
         for (BigNum plainCharacter : plainText) {
             BigNum x = new BigNum(plainCharacter);
-            x = BigNum.multiply(x, x);
+            x.multiply(x);
             x.modulo(publicKey);
+        }
+
+        // Decrypt ciphertext
+        BigNum one = new BigNum(1, BigNum.BLOCKS - 2);
+
+        BigNum exponentP = new BigNum(p);
+        exponentP.add(one);
+        exponentP.shiftRight(2);
+
+        BigNum exponentQ = new BigNum(q);
+        exponentQ.add(one);
+        exponentQ.shiftRight(2);
+
+        BigNum[] decryptedText = new BigNum[cipherText.length];
+        for (BigNum encryptedCharacter : cipherText) {
+
         }
     }
 }

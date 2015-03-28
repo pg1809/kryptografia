@@ -2,10 +2,6 @@ package pl.kryptografia.rabin.input;
 
 import pl.kryptografia.rabin.bignum.BigNum;
 
-/**
- *
- * @author Wojciech Szałapski
- */
 public class BytesToBigNumsConverter {
 
     /**
