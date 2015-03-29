@@ -14,8 +14,8 @@ public class App {
         BigNum q = new BigNum();
 
         // p and q are big random numbers
-        p.randomize(BigNum.BLOCKS / 4);
-        q.randomize(BigNum.BLOCKS / 4);
+        p.randomize(BigNum.BLOCKS / 2);
+        q.randomize(BigNum.BLOCKS / 2);
 
         // p and q now gives 3 modulo 4
         p.setBit(BigNum.BITS - 2, 1);
@@ -33,7 +33,7 @@ public class App {
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
-
+        
         // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
         for (int i = 0; i < plainText.length; ++i) {
@@ -41,7 +41,7 @@ public class App {
             cipherText[i].multiply(cipherText[i]);
             cipherText[i].modulo(publicKey);
         }
-        
+
         // Decrypt ciphertext
         BigNum exponentP = new BigNum(p);
         exponentP.add(BigNum.ONE);
@@ -50,7 +50,7 @@ public class App {
         BigNum exponentQ = new BigNum(q);
         exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
-        
+
         BigNum[] decryptedText = new BigNum[cipherText.length];
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);

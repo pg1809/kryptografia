@@ -48,6 +48,11 @@ public class BigNum {
     private final SecureRandom generator = new SecureRandom();
 
     /**
+     * Number's sign (+1 or -1).
+     */
+    private int sign = 1;
+
+    /**
      * Creates a big number equal to 0.
      */
     public BigNum() {
@@ -71,6 +76,7 @@ public class BigNum {
      * @param pattern Big number to be duplicated.
      */
     public BigNum(BigNum pattern) {
+        sign = pattern.sign;
         fillFromBinaryRepresentation(pattern.binaryRepresentation());
     }
 
@@ -93,6 +99,7 @@ public class BigNum {
         }
 
         fillFromBinaryRepresentation(result.binaryRepresentation());
+        sign = sign * x.sign;
     }
 
     /**
@@ -101,21 +108,55 @@ public class BigNum {
      * @param x Value to add to this number.
      */
     public void add(BigNum x) {
-        long sum = 0;
-        for (int i = BLOCKS - 1; i >= 0; --i) {
-            sum += number[i] + x.number[i];
-            number[i] = extractLastBits(sum);
-            sum >>>= 32;
+        if (sign == x.sign) {
+            long sum = 0;
+            for (int i = BLOCKS - 1; i >= 0; --i) {
+                sum += number[i] + x.number[i];
+                number[i] = extractLastBits(sum);
+                sum >>>= 32;
+            }
+        } else {
+            BigNum a = new BigNum(this);
+            BigNum b = new BigNum(x);
+            boolean thisIsGreater = true;
+            if (!absGreaterOrEqualTo(x)) {
+                a = new BigNum(x);
+                a.setSign(1);
+                b = new BigNum(this);
+                b.setSign(1);
+                thisIsGreater = false;
+            }
+
+            a.absSubtract(b);
+            fillFromBinaryRepresentation(a.binaryRepresentation());
+
+            if (thisIsGreater == (sign == 1)) {
+                sign = 1;
+            } else {
+                sign = -1;
+            }
         }
     }
 
     /**
-     * Decreases a big number by given value (works only if the result is
-     * non-negative.
+     * Subtract given big number from this number.
+     * 
+     * @param x Subtrahent.
+     */
+    public void subtract(BigNum x) {
+        BigNum y = new BigNum(x);
+        y.setSign(-x.sign);
+
+        add(y);
+    }
+
+    /**
+     * Decreases a big number by given value (considers only absolute values and
+     * works for non-negative result).
      *
      * @param x Value to subtract from this number.
      */
-    public void subtract(BigNum x) {
+    public void absSubtract(BigNum x) {
         byte[] minuend = binaryRepresentation();
         byte[] subtrahent = x.binaryRepresentation();
         byte[] result = new byte[minuend.length];
@@ -151,12 +192,12 @@ public class BigNum {
      */
     public void modulo(BigNum modulus) {
 
-        while (greaterOrEqualTo(modulus)) {
+        while (absGreaterOrEqualTo(modulus)) {
             BigNum x = new BigNum(modulus);
             int shift = findMaximumLeftShift(x);
             x.shiftLeft(shift);
 
-            subtract(x);
+            absSubtract(x);
         }
     }
 
@@ -216,14 +257,14 @@ public class BigNum {
             number[block] &= ~(1 << (BLOCK_SIZE - positionInBlock - 1));
         }
     }
-
+    
     /**
      * Returns bit value on given position.
      *
      * @param position Bit position (numbered from 0).
      * @return Bit value.
      */
-    private byte getBit(int position) {
+    public byte getBit(int position) {
         int block = position / 32;
         int positionInBlock = position % 32;
 
@@ -254,7 +295,7 @@ public class BigNum {
 
         BigNum xCopy = new BigNum(x);
 
-        while (greaterOrEqualTo(xCopy)) {
+        while (absGreaterOrEqualTo(xCopy)) {
             ++shift;
 
             if (xCopy.getBit(0) == 1) {
@@ -357,12 +398,14 @@ public class BigNum {
     }
 
     /**
-     * Checks if this number is greater or equal to given number.
+     * Checks if this number is greater or equal to given number (only absolute
+     * values are concerned).
      *
      * @param x Number to compare with.
-     * @return True if and only if this number is not less than given number.
+     * @return True if and only if this number is not less than given number
+     * (only absolute values are concerned).
      */
-    private boolean greaterOrEqualTo(BigNum x) {
+    public boolean absGreaterOrEqualTo(BigNum x) {
         byte[] me = binaryRepresentation();
         byte[] other = x.binaryRepresentation();
 
@@ -405,7 +448,19 @@ public class BigNum {
             return false;
         }
         final BigNum other = (BigNum) obj;
+        if (this.sign != other.sign) {
+            return false;
+        }
         return Arrays.equals(this.number, other.number);
+    }
+
+    /**
+     * Checks if this number is non-negative.
+     *
+     * @return True if and only if this number's sign is +1.
+     */
+    public boolean isNonNegative() {
+        return sign == 1;
     }
 
     /**
@@ -426,5 +481,9 @@ public class BigNum {
      */
     public void replaceBlock(int blockNumber, long value) {
         number[blockNumber] = value;
+    }
+
+    public void setSign(int sign) {
+        this.sign = sign;
     }
 }
