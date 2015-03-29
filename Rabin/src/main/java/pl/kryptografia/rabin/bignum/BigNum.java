@@ -13,9 +13,26 @@ public class BigNum {
     /**
      * Number of 32 bit blocks.
      *
+     * 4 blocks = 128 bits
      * 8 blocks = 256 bits
+     * 16 blocks = 512 bits
      */
-    public static final int BLOCKS = 8;
+    public static final int BLOCKS = 4;
+
+    /**
+     * Number of bits in one BigNum.
+     */
+    public static final int BITS = BLOCKS * BLOCK_SIZE;
+
+    /**
+     * BigNum representing 0.
+     */
+    public static final BigNum ZERO = new BigNum();
+
+    /**
+     * BigNum representing 1.
+     */
+    public static final BigNum ONE = new BigNum(1, BLOCKS - 2);
 
     /**
      * Binary representation of the number.
@@ -61,9 +78,8 @@ public class BigNum {
      * Multiplies two big numbers with half a maximum least significant bits.
      *
      * @param x Multiplier.
-     * @return Result of the multiplication.
      */
-    public BigNum multiply(BigNum x) {
+    public void multiply(BigNum x) {
         BigNum result = new BigNum();
 
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
@@ -76,7 +92,7 @@ public class BigNum {
             }
         }
 
-        return result;
+        fillFromBinaryRepresentation(result.binaryRepresentation());
     }
 
     /**
@@ -134,9 +150,9 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
-        BigNum x = new BigNum(modulus);
 
-        while (greaterOrEqualTo(x)) {
+        while (greaterOrEqualTo(modulus)) {
+            BigNum x = new BigNum(modulus);
             int shift = findMaximumLeftShift(x);
             x.shiftLeft(shift);
 
@@ -152,7 +168,21 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void powerModulo(BigNum exponent, BigNum modulus) {
-        modulo(modulus);
+        BigNum factor = new BigNum(this);
+        factor.modulo(modulus);
+        BigNum result = new BigNum(BigNum.ONE);
+
+        for (int i = BITS - 1; i >= 0; --i) {
+            if (exponent.getBit(i) == 1) {
+                result.multiply(factor);
+                result.modulo(modulus);
+            }
+
+            factor.multiply(factor);
+            factor.modulo(modulus);
+        }
+
+        fillFromBinaryRepresentation(result.binaryRepresentation());
     }
 
     /**

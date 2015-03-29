@@ -13,15 +13,15 @@ public class App {
         BigNum p = new BigNum();
         BigNum q = new BigNum();
 
-        // p and q are random 128-bit numbers
-        p.randomize(4);
-        q.randomize(4);
+        // p and q are big random numbers
+        p.randomize(BigNum.BLOCKS / 4);
+        q.randomize(BigNum.BLOCKS / 4);
 
         // p and q now gives 3 modulo 4
-        p.setBit(254, 1);
-        p.setBit(255, 1);
-        q.setBit(254, 1);
-        q.setBit(255, 1);
+        p.setBit(BigNum.BITS - 2, 1);
+        p.setBit(BigNum.BITS - 1, 1);
+        q.setBit(BigNum.BITS - 2, 1);
+        q.setBit(BigNum.BITS - 1, 1);
 
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
@@ -36,26 +36,28 @@ public class App {
 
         // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
-        for (BigNum plainCharacter : plainText) {
-            BigNum x = new BigNum(plainCharacter);
-            x.multiply(x);
-            x.modulo(publicKey);
+        for (int i = 0; i < plainText.length; ++i) {
+            cipherText[i] = new BigNum(plainText[i]);
+            cipherText[i].multiply(cipherText[i]);
+            cipherText[i].modulo(publicKey);
         }
-
+        
         // Decrypt ciphertext
-        BigNum one = new BigNum(1, BigNum.BLOCKS - 2);
-
         BigNum exponentP = new BigNum(p);
-        exponentP.add(one);
+        exponentP.add(BigNum.ONE);
         exponentP.shiftRight(2);
 
         BigNum exponentQ = new BigNum(q);
-        exponentQ.add(one);
+        exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
-
+        
         BigNum[] decryptedText = new BigNum[cipherText.length];
         for (BigNum encryptedCharacter : cipherText) {
+            BigNum squareP = new BigNum(encryptedCharacter);
+            squareP.powerModulo(exponentP, p);
 
+            BigNum squareQ = new BigNum(encryptedCharacter);
+            squareQ.powerModulo(exponentQ, q);
         }
     }
 }
