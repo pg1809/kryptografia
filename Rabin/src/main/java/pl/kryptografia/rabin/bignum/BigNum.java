@@ -1,9 +1,14 @@
 package pl.kryptografia.rabin.bignum;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 public class BigNum {
+
+    private static BigInteger bi(BigNum x) {
+        return new BigInteger(x.toString(), 2);
+    }
 
     /**
      * Block size in bits.
@@ -62,12 +67,15 @@ public class BigNum {
     /**
      * Creates a big number with initial 64 bits on given positions.
      *
+     * 64 bits need to be split into two blocks because the number is
+     * represented only by least significant 32 bits in each block.
+     *
      * @param initialValue Initial 64 bits.
      * @param firstBlock Number of the first block of initial value.
      */
     public BigNum(long initialValue, int firstBlock) {
+        number[firstBlock + 1] = extractLast32Bits(initialValue);
         number[firstBlock] = (initialValue >>> 32);
-        number[firstBlock + 1] = extractLastBits(initialValue);
     }
 
     /**
@@ -83,16 +91,26 @@ public class BigNum {
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
+     * The above constraint is equivalent to the following: each multiplied
+     * number has to have only zeros on first half positions. It guarantees that
+     * the result fits into the format. If there are any ones where should be
+     * zeros, these ones are ignored.
+     *
      * @param x Multiplier.
      */
     public void multiply(BigNum x) {
         BigNum result = new BigNum();
 
+        // multiply each block from this number by each block from number x
+        // only non-zero blocks are considered (see method description)
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
                 long product = number[i] * x.number[j];
+                // when two blocks are multiplied their positions need to be 
+                // considered to shift the result left properly
                 int position = i + j - BLOCKS;
 
+                // add the result of this multiplication to the global result
                 BigNum y = new BigNum(product, position);
                 result.add(y);
             }
@@ -103,33 +121,50 @@ public class BigNum {
     }
 
     /**
-     * Increases a big number by given value.
+     * Adds given value to this big number.
      *
      * @param x Value to add to this number.
      */
     public void add(BigNum x) {
         if (sign == x.sign) {
+            // when both numbers are positive or negative it is just a simple 
+            // bitwise sum
             long sum = 0;
             for (int i = BLOCKS - 1; i >= 0; --i) {
                 sum += number[i] + x.number[i];
-                number[i] = extractLastBits(sum);
+                // put least significant 32 bits into the result
+                number[i] = extractLast32Bits(sum);
+                // the result may overflow 32 bits so the next result is
+                // calculated using the rest of the sum
                 sum >>>= 32;
             }
         } else {
+            // when one number is positive and the other is negative we need to
+            // constitute which one is greater as per its absolute value
             BigNum a = new BigNum(this);
             BigNum b = new BigNum(x);
             boolean thisIsGreater = true;
             if (!absGreaterOrEqualTo(x)) {
                 a = new BigNum(x);
-                a.setSign(1);
                 b = new BigNum(this);
-                b.setSign(1);
                 thisIsGreater = false;
             }
+            // now we are sure that |a| >= |b|
 
+            // we subtract absolute values of the numbers
             a.absSubtract(b);
+            // absolute value of the result is equal to absolute value of above
+            // subtraction
             fillFromBinaryRepresentation(a.binaryRepresentation());
 
+            // now we need to check if the result is positive or negative
+            // |this| >= |x| # this >= 0 # result >= 0
+            //        0      #     0     #    1
+            //        0      #     1     #    0
+            //        1      #     0     #    0
+            //        1      #     1     #    1
+            // the conclusion is that the result is non-negative if and only if
+            // these two logical values are equal
             if (thisIsGreater == (sign == 1)) {
                 sign = 1;
             } else {
@@ -140,13 +175,15 @@ public class BigNum {
 
     /**
      * Subtract given big number from this number.
-     * 
+     *
      * @param x Subtrahent.
      */
     public void subtract(BigNum x) {
         BigNum y = new BigNum(x);
-        y.setSign(-x.sign);
 
+        // add function handles all combinations of positive and negative 
+        // numbers so we replace subtraction with addition
+        y.setSign(-y.sign);
         add(y);
     }
 
@@ -157,13 +194,18 @@ public class BigNum {
      * @param x Value to subtract from this number.
      */
     public void absSubtract(BigNum x) {
+        // minuend - subtrahent = result
         byte[] minuend = binaryRepresentation();
         byte[] subtrahent = x.binaryRepresentation();
         byte[] result = new byte[minuend.length];
 
         byte borrowed = 0;
+        // we start from the least significant bit and perform bitwise
+        // subtraction
         for (int i = minuend.length - 1; i >= 0; --i) {
+            // if we 'borrowed' 1 in the last step we need to pay now
             minuend[i] -= borrowed;
+            // simple subtraction
             minuend[i] -= subtrahent[i];
 
             switch (minuend[i]) {
@@ -188,15 +230,23 @@ public class BigNum {
     /**
      * Divides this number modulo given big number.
      *
+     * This method considers only absolute values of the numbers.
+     *
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
 
+        // we subtract multiples of modulus until we get only rest
         while (absGreaterOrEqualTo(modulus)) {
+            // get a copy of modulus
             BigNum x = new BigNum(modulus);
+            // shift modulus left as much as you can
+            // this operation is equivalent to finding modulus * 2^k with the
+            // greatest k possible
             int shift = findMaximumLeftShift(x);
             x.shiftLeft(shift);
 
+            // x is now some multiple of modulus so we can subtract it
             absSubtract(x);
         }
     }
@@ -205,20 +255,26 @@ public class BigNum {
      * Raises this number to given power and divides the result modulo another
      * given number.
      *
+     * Signs of the numbers are ignored.
+     *
      * @param exponent Exponent.
      * @param modulus Modulus.
      */
     public void powerModulo(BigNum exponent, BigNum modulus) {
         BigNum factor = new BigNum(this);
         factor.modulo(modulus);
+
         BigNum result = new BigNum(BigNum.ONE);
 
+        // fast modular exponentation is used
+        // we multiply the result on 1 bits of the exponent
         for (int i = BITS - 1; i >= 0; --i) {
             if (exponent.getBit(i) == 1) {
                 result.multiply(factor);
                 result.modulo(modulus);
             }
 
+            // factor is squared in each step
             factor.multiply(factor);
             factor.modulo(modulus);
         }
@@ -237,7 +293,7 @@ public class BigNum {
             number[i] = 0;
         }
         for (int i = BLOCKS - n; i < BLOCKS; ++i) {
-            number[i] = extractLastBits(generator.nextLong());
+            number[i] = extractLast32Bits(generator.nextLong());
         }
     }
 
@@ -252,12 +308,12 @@ public class BigNum {
         int positionInBlock = position % 32;
 
         if (value == 1) {
-            number[block] |= (1 << (BLOCK_SIZE - positionInBlock - 1));
+            number[block] |= (1L << (BLOCK_SIZE - positionInBlock - 1));
         } else if (value == 0) {
-            number[block] &= ~(1 << (BLOCK_SIZE - positionInBlock - 1));
+            number[block] &= ~(1L << (BLOCK_SIZE - positionInBlock - 1));
         }
     }
-    
+
     /**
      * Returns bit value on given position.
      *
@@ -268,7 +324,7 @@ public class BigNum {
         int block = position / 32;
         int positionInBlock = position % 32;
 
-        if ((number[block] & (1 << (BLOCK_SIZE - positionInBlock - 1))) != 0) {
+        if ((number[block] & (1L << (BLOCK_SIZE - positionInBlock - 1))) != 0) {
             return 1;
         } else {
             return 0;
@@ -276,21 +332,16 @@ public class BigNum {
     }
 
     /**
-     * Checks if this number is odd.
-     *
-     * @return True if and only if this number is odd.
-     */
-    private boolean isOdd() {
-        return (number[BLOCKS - 1] & 1) != 0;
-    }
-
-    /**
      * Finds maximum left shift of x so that it does not exceed this number.
+     *
+     * This method is equivalent to finding maximum k so that x * 2^k does not
+     * exceed this number.
      *
      * @param x The number to be shifted.
      * @return Maximum shift (or -1 if x is greater than this number).
      */
     private int findMaximumLeftShift(BigNum x) {
+        // if x is already greater than this number return -1
         int shift = -1;
 
         BigNum xCopy = new BigNum(x);
@@ -298,6 +349,8 @@ public class BigNum {
         while (absGreaterOrEqualTo(xCopy)) {
             ++shift;
 
+            // if the first bit is 1 we cannot shift left anymore because we get 
+            // overflow
             if (xCopy.getBit(0) == 1) {
                 return shift;
             }
@@ -319,6 +372,7 @@ public class BigNum {
             binaryRepresentation[i] = binaryRepresentation[i + bias];
         }
 
+        // when we shift left zeros appear on the right
         for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
             binaryRepresentation[i] = 0;
         }
@@ -329,6 +383,8 @@ public class BigNum {
     /**
      * Shifts the number right by given number of bits (unsigned shift).
      *
+     * Unsigned shift means we do not care if the number is positive or not.
+     *
      * @param bias Number of bits by which this number should be shifted.
      */
     public void shiftRight(int bias) {
@@ -338,6 +394,7 @@ public class BigNum {
             binaryRepresentation[i] = binaryRepresentation[i - bias];
         }
 
+        // when we perform unsigned right shift zeros appear on the left
         for (int i = 0; i < bias; ++i) {
             binaryRepresentation[i] = 0;
         }
@@ -347,6 +404,9 @@ public class BigNum {
 
     /**
      * Fills this number content with given binary representation.
+     *
+     * This method can be used as a clone not changing the original number's
+     * sign.
      *
      * @param binaryRepresentation Binary representation of the BigNum.
      */
@@ -358,6 +418,8 @@ public class BigNum {
 
     /**
      * Fills all bit with zeros.
+     *
+     * Includes not used 32 most significant bits of each block.
      */
     private void fillWithZeros() {
         for (int i = 0; i < BLOCKS; ++i) {
@@ -368,17 +430,20 @@ public class BigNum {
     /**
      * Extracts last 32 bits from long integer.
      *
+     * Unlike casting long to int this method literally cuts last 32 bits.
+     *
      * @param x Original number.
      * @return Last 32 bits of the number.
      */
-    private long extractLastBits(long x) {
+    private long extractLast32Bits(long x) {
         return (x << 32) >>> 32;
     }
 
     /**
-     * Returns a binary representation of BigNum as an array of bytes.
+     * Returns a binary representation of big number as an array of bytes.
      *
-     * @return Binary representation of BigNum in the form of an array of bytes.
+     * @return Binary representation of big number in the form of an array of 
+     * bytes with each value from {0, 1}.
      */
     private byte[] binaryRepresentation() {
         byte[] result = new byte[BLOCKS * BLOCK_SIZE];
@@ -386,7 +451,7 @@ public class BigNum {
         int counter = 0;
         for (int i = 0; i < BLOCKS; ++i) {
             for (int j = BLOCK_SIZE - 1; j >= 0; --j) {
-                if ((number[i] & (1 << j)) != 0) {
+                if ((number[i] & (1L << j)) != 0) {
                     result[counter++] = 1;
                 } else {
                     result[counter++] = 0;
@@ -427,6 +492,28 @@ public class BigNum {
         byte[] binaryRepresentation = binaryRepresentation();
         for (byte b : binaryRepresentation) {
             builder.append(b);
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Converts big number to its binary representation with separation marks
+     * between each 32 bits.
+     *
+     * @return Pretty binary representation of this big number.
+     */
+    public String toPrettyString() {
+        StringBuilder builder = new StringBuilder();
+
+        byte[] binaryRepresentation = binaryRepresentation();
+        int counter = 0;
+        for (byte b : binaryRepresentation) {
+            if (counter != 0 && (counter % BLOCK_SIZE == 0)) {
+                builder.append('-');
+            }
+            builder.append(b);
+            ++counter;
         }
 
         return builder.toString();

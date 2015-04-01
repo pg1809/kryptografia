@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.calculation;
 
+import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 
@@ -17,7 +18,7 @@ public class PrimeGenerator {
     /**
      * Random numbers generator.
      */
-    private Random generator = new Random();
+    private final Random generator = new Random();
 
     private PrimeGenerator() {
     }
@@ -36,6 +37,9 @@ public class PrimeGenerator {
         four.setBit(BigNum.BITS - 3, 1);
 
         while (!isPrime(a)) {
+//            System.out.println("a is not prime");
+//            BigInteger b = new BigInteger(a.toString(), 2);
+//            System.out.println(b.isProbablePrime(MILLER_RABIN_CONSTANT));
             a.subtract(four);
         }
 
