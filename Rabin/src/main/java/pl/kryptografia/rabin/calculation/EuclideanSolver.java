@@ -23,7 +23,7 @@ public class EuclideanSolver {
         // get copies not to modify original parameters
         BigNum a = new BigNum(A);
         BigNum b = new BigNum(B);
-        
+
         // if a or b is equal to 1 the solution is trivial
         if (A.equals(BigNum.ONE)) {
             return new Pair(new BigNum(BigNum.ONE), new BigNum(BigNum.ZERO));
@@ -43,37 +43,37 @@ public class EuclideanSolver {
         do {
             x = new BigNum(a);
             x.divide(b);
-            
+
             r = new BigNum(a);
             r.modulo(b);
-            
+
             if (r.absGreaterThan(BigNum.ONE)) {
                 // a and x are going to be modified so it is crucial to put
                 // their copies onto the stack
                 stack.push(new Pair(new BigNum(a), new BigNum(x)));
-                
+
                 a = new BigNum(b);
                 b = new BigNum(r);
             }
         } while (r.absGreaterThan(BigNum.ONE));
-        
+
         BigNum w = new BigNum(BigNum.ONE);
-        
+
         while (!stack.isEmpty()) {
             BigNum f = stack.peek().first;
             BigNum s = stack.peek().second;
             stack.pop();
-            
+
             BigNum temp = new BigNum(w);
-            
+
             x.setSign(-x.getSign());
-            
+
             w = new BigNum(x);
-            
+
             x.multiply(s);
             x.subtract(temp);
         }
-        
+
         x.setSign(-x.getSign());
         return new Pair(w, x);
     }

@@ -2,6 +2,8 @@ package pl.kryptografia.rabin.ui;
 
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
+import pl.kryptografia.rabin.calculation.EuclideanSolver;
+import pl.kryptografia.rabin.calculation.Pair;
 import pl.kryptografia.rabin.calculation.PrimeGenerator;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
@@ -66,6 +68,10 @@ public class App {
 
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
+            
+            Pair solution = EuclideanSolver.getInstance().solve(p, q);
+            BigNum yP = solution.first;
+            BigNum yQ = solution.second;
         }
     }
 }

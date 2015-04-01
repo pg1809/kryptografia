@@ -244,16 +244,22 @@ public class BigNum {
             // x is now some multiple of modulus so we can subtract it
             absSubtract(x);
         }
+
+        // if this number is negative we need to correct the remainder
+        if (sign == -1) {
+            sign = 1;
+            add(modulus);
+        }
     }
-    
+
     /**
      * Divides this number by given number and gives up the remainder.
-     * 
+     *
      * @param divisor Number to divide by.
      */
     public void divide(BigNum divisor) {
         BigNum result = new BigNum();
-        
+
         // we subtract multiples of divisor from the initial number and remember
         // how many times divisor we subtracted
         while (absGreaterOrEqualTo(divisor)) {
@@ -264,7 +270,7 @@ public class BigNum {
             // greatest k possible
             int shift = findMaximumLeftShift(x);
             x.shiftLeft(shift);
-            
+
             // shift shows how many times divisor was subtracted
             // we add this value to the result
             // e. g. if shift was 3 it means we can perform:
@@ -278,7 +284,7 @@ public class BigNum {
             // x is now some multiple of divisor so we can subtract it
             absSubtract(x);
         }
-        
+
         sign *= divisor.sign;
         fillFromBinaryRepresentation(result.binaryRepresentation());
     }
@@ -571,7 +577,7 @@ public class BigNum {
         } else {
             builder.append('?');
         }
-        
+
         byte[] binaryRepresentation = binaryRepresentation();
         int counter = 0;
         for (byte b : binaryRepresentation) {
