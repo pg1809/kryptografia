@@ -7,7 +7,7 @@ public class PrimeGenerator {
     /**
      * Number of iterations of Miller-Rabin test.
      */
-    private final static int MILLER_RABIN_CONSTANT = 50;
+    private final static int MILLER_RABIN_CONSTANT = 15;
 
     /**
      * Private constructor for singleton pattern purpose.
@@ -58,11 +58,11 @@ public class PrimeGenerator {
         if (x.equals(BigNum.ONE)) {
             return false;
         }
-        
+
         BigNum d = new BigNum(x);
         d.setBit(BigNum.BITS - 1, 0);
         // d is the original number minus one (so it is for sure an even number)
-        
+
         BigNum xMinusOne = new BigNum(d);
 
         // make d * 2^s = x - 1 (find maximum s)

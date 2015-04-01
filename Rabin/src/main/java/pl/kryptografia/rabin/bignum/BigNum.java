@@ -231,7 +231,7 @@ public class BigNum {
      */
     public void modulo(BigNum modulus) {
 
-        // we subtract multiples of modulus until we get only rest
+        // we subtract multiples of modulus until we get only the reminder
         while (absGreaterOrEqualTo(modulus)) {
             // get a copy of modulus
             BigNum x = new BigNum(modulus);
@@ -244,6 +244,43 @@ public class BigNum {
             // x is now some multiple of modulus so we can subtract it
             absSubtract(x);
         }
+    }
+    
+    /**
+     * Divides this number by given number and gives up the remainder.
+     * 
+     * @param divisor Number to divide by.
+     */
+    public void divide(BigNum divisor) {
+        BigNum result = new BigNum();
+        
+        // we subtract multiples of divisor from the initial number and remember
+        // how many times divisor we subtracted
+        while (absGreaterOrEqualTo(divisor)) {
+            // get a copy of divisor
+            BigNum x = new BigNum(divisor);
+            // shift divisor left as much as you can
+            // this operation is equivalent to finding divisor * 2^k with the
+            // greatest k possible
+            int shift = findMaximumLeftShift(x);
+            x.shiftLeft(shift);
+            
+            // shift shows how many times divisor was subtracted
+            // we add this value to the result
+            // e. g. if shift was 3 it means we can perform:
+            // this -= divisor * 2^3
+            // we should add 2^3 = 8 to the result and it is the same as setting
+            // an appropriate bit in the result
+            // shift is different in every iteration of the loop so we can set
+            // bit instead of adding
+            result.setBit(BigNum.BITS - shift - 1, 1);
+
+            // x is now some multiple of divisor so we can subtract it
+            absSubtract(x);
+        }
+        
+        sign *= divisor.sign;
+        fillFromBinaryRepresentation(result.binaryRepresentation());
     }
 
     /**
@@ -437,7 +474,7 @@ public class BigNum {
     /**
      * Returns a binary representation of big number as an array of bytes.
      *
-     * @return Binary representation of big number in the form of an array of 
+     * @return Binary representation of big number in the form of an array of
      * bytes with each value from {0, 1}.
      */
     private byte[] binaryRepresentation() {
@@ -466,6 +503,32 @@ public class BigNum {
      * (only absolute values are concerned).
      */
     public boolean absGreaterOrEqualTo(BigNum x) {
+        return absGreaterParametrized(x, false);
+    }
+
+    /**
+     * Checks if this number is greater than given number (only absolute values
+     * are concerned).
+     *
+     * @param x Number to compare with.
+     * @return True if and only if this number is not less than given number
+     * (only absolute values are concerned).
+     */
+    public boolean absGreaterThan(BigNum x) {
+        return absGreaterParametrized(x, true);
+    }
+
+    /**
+     * Checks if this number is greater than (or equal if not strict) than given
+     * big number.
+     *
+     * @param x Number to compare with.
+     * @param strict A flag indicating if comparison should be strict ('>'
+     * rather than '>=').
+     * @return True if and only if this number compares not less or greater
+     * (only absolute values are concerned).
+     */
+    private boolean absGreaterParametrized(BigNum x, boolean strict) {
         byte[] me = binaryRepresentation();
         byte[] other = x.binaryRepresentation();
 
@@ -477,7 +540,7 @@ public class BigNum {
             }
         }
 
-        return true;
+        return !strict;
     }
 
     @Override

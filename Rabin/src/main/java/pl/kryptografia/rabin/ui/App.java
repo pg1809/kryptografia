@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.ui;
 
+import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.PrimeGenerator;
