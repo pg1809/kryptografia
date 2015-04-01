@@ -247,8 +247,8 @@ public class BigNum {
 
         // if this number is negative we need to correct the remainder
         if (sign == -1) {
-            sign = 1;
             add(modulus);
+            sign = 1;
         }
     }
 
