@@ -564,6 +564,14 @@ public class BigNum {
     public String toPrettyString() {
         StringBuilder builder = new StringBuilder();
 
+        if (sign == 1) {
+            builder.append('+');
+        } else if (sign == -1) {
+            builder.append('-');
+        } else {
+            builder.append('?');
+        }
+        
         byte[] binaryRepresentation = binaryRepresentation();
         int counter = 0;
         for (byte b : binaryRepresentation) {
@@ -626,6 +634,10 @@ public class BigNum {
      */
     public void replaceBlock(int blockNumber, long value) {
         number[blockNumber] = value;
+    }
+
+    public int getSign() {
+        return sign;
     }
 
     public void setSign(int sign) {

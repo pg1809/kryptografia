@@ -15,15 +15,19 @@ public class EuclideanSolver {
      * For given relatively prime big numbers a and b returns a pair (s, t) such
      * that sa + tb = 1.
      *
-     * @param a A big number relatively prime to b.
-     * @param b A big number relatively prime to a.
+     * @param A A big number relatively prime to b.
+     * @param B A big number relatively prime to a.
      * @return The solution (s, t) of diofantic equation sa + tb = 1.
      */
-    public Pair solve(BigNum a, BigNum b) {
+    public Pair solve(BigNum A, BigNum B) {
+        // get copies not to modify original parameters
+        BigNum a = new BigNum(A);
+        BigNum b = new BigNum(B);
+        
         // if a or b is equal to 1 the solution is trivial
-        if (a.equals(BigNum.ONE)) {
+        if (A.equals(BigNum.ONE)) {
             return new Pair(new BigNum(BigNum.ONE), new BigNum(BigNum.ZERO));
-        } else if (b.equals(BigNum.ONE)) {
+        } else if (B.equals(BigNum.ONE)) {
             return new Pair(new BigNum(BigNum.ZERO), new BigNum(BigNum.ONE));
         }
 
@@ -36,10 +40,42 @@ public class EuclideanSolver {
         // reminder
         BigNum r;
 
-//        do {
-//            
-//        } while (r.absGreaterThan(BigNum.ONE));
-        return new Pair(a, b);
+        do {
+            x = new BigNum(a);
+            x.divide(b);
+            
+            r = new BigNum(a);
+            r.modulo(b);
+            
+            if (r.absGreaterThan(BigNum.ONE)) {
+                // a and x are going to be modified so it is crucial to put
+                // their copies onto the stack
+                stack.push(new Pair(new BigNum(a), new BigNum(x)));
+                
+                a = new BigNum(b);
+                b = new BigNum(r);
+            }
+        } while (r.absGreaterThan(BigNum.ONE));
+        
+        BigNum w = new BigNum(BigNum.ONE);
+        
+        while (!stack.isEmpty()) {
+            BigNum f = stack.peek().first;
+            BigNum s = stack.peek().second;
+            stack.pop();
+            
+            BigNum temp = new BigNum(w);
+            
+            x.setSign(-x.getSign());
+            
+            w = new BigNum(x);
+            
+            x.multiply(s);
+            x.subtract(temp);
+        }
+        
+        x.setSign(-x.getSign());
+        return new Pair(w, x);
     }
 
     public static EuclideanSolver getInstance() {
