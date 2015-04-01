@@ -1,14 +1,9 @@
 package pl.kryptografia.rabin.bignum;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 public class BigNum {
-
-    private static BigInteger bi(BigNum x) {
-        return new BigInteger(x.toString(), 2);
-    }
 
     /**
      * Block size in bits.
