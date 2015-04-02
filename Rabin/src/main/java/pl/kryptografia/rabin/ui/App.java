@@ -37,9 +37,6 @@ public class App {
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
         publicKey.multiply(q);
-        
-        System.out.println("public key");
-        System.out.println(new BigInteger(publicKey.toString(), 2));
 
         // Generate random input and split it into BigNum chunks
         byte[] bytes = new byte[50];
@@ -65,6 +62,19 @@ public class App {
         exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
 
+        // extended Euclidean algorithm
+        // we search for yP and yQ such that:
+        // yP * p + yQ * q = 1
+        Pair solution = EuclideanSolver.getInstance().solve(p, q);
+        BigNum yP = solution.first;
+        BigNum yQ = solution.second;
+
+        // we calculate the remainder modulo public key because yP and yQ are
+        // used only as a factor in equations calculated modulo public key
+        // that way we make sure that all partial result will not overflow
+        yP.modulo(publicKey);
+        yQ.modulo(publicKey);
+
         BigNum[] decryptedText = new BigNum[cipherText.length];
         int counter = 0;
         for (BigNum encryptedCharacter : cipherText) {
@@ -73,13 +83,6 @@ public class App {
 
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
-
-            Pair solution = EuclideanSolver.getInstance().solve(p, q);
-            BigNum yP = solution.first;
-            BigNum yQ = solution.second;
-
-            yP.modulo(publicKey);
-            yQ.modulo(publicKey);
 
             BigNum tempP = new BigNum(p);
             tempP.multiply(squareQ);
@@ -110,9 +113,17 @@ public class App {
             possibleText[3] = new BigNum(publicKey);
             possibleText[3].subtract(possibleText[1]);
 
+//            System.out.println(plainText[counter++].toPrettyString());
+//            System.out.println(" : ");
+//            for (int i = 0; i < 4; ++i) {
+//                System.out.println(possibleText[i].toPrettyString());
+//            }
+//            System.out.println("");
+            
             System.out.println(new BigInteger(plainText[counter++].toString(), 2));
-            for (BigNum b : possibleText) {
-                System.out.println(new BigInteger(b.toString(), 2));
+            System.out.println(" : ");
+            for (int i = 0; i < 4; ++i) {
+                System.out.println(new BigInteger(possibleText[i].toString(), 2));
             }
             System.out.println("");
         }
