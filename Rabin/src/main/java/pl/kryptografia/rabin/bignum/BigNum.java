@@ -90,6 +90,13 @@ public class BigNum {
 //            }
 //        }
 //    }
+    private void hasBlockUnderflow() {
+        for (int i = 0; i < BLOCKS; ++i) {
+            if (number[i] < 0) {
+                throw new RuntimeException("Block underflow!");
+            }
+        }
+    }
 
     private void isMoreThanHalfBig() {
         for (int i = 0; i < BLOCKS / 2; ++i) {
@@ -98,7 +105,7 @@ public class BigNum {
             }
         }
     }
-    
+
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
@@ -110,15 +117,21 @@ public class BigNum {
      * @param x Multiplier.
      */
     public void multiply(BigNum x) {
-        isMoreThanHalfBig();
-        x.isMoreThanHalfBig();
+        hasBlockUnderflow();
         BigNum result = new BigNum();
 
         // multiply each block from this number by each block from number x
         // only non-zero blocks are considered (see method description)
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
+                if (number[i] < 0 || x.number[j] < 0) {
+                    System.out.println("minus");
+                    System.out.println(number[i]);
+                    System.out.println(x.number[j]);
+                    System.out.println("");
+                }
                 long product = number[i] * x.number[j];
+
                 // when two blocks are multiplied their positions need to be 
                 // considered to shift the result left properly
                 int position = i + j - BLOCKS;

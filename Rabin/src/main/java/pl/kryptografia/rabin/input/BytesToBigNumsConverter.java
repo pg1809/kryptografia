@@ -74,7 +74,8 @@ public class BytesToBigNumsConverter {
         for (int i = BigNum.BLOCKS - BLOCKS_PER_CHUNK; i < BigNum.BLOCKS; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
-                block |= (bytes[currentByte] & 0xFF) << (24 - 8 * j);
+                // 0xFF sorcery lets us treat everything as really unsigned
+                block |= ((bytes[currentByte] & 0xFF) << (24 - 8 * j)) & 0xFF;
                 ++currentByte;
             }
             result.replaceBlock(i, block);
