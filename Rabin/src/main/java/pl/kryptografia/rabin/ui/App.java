@@ -19,9 +19,9 @@ public class App {
         BigNum q = new BigNum();
 
         // p and q are big distinct random numbers
-        p.randomize(BigNum.BLOCKS / 2);
+        p.randomize(BigNum.BLOCKS / 4);
         do {
-            q.randomize(BigNum.BLOCKS / 2);
+            q.randomize(BigNum.BLOCKS / 4);
         } while (p.equals(q));
 
         // p and q now gives 3 modulo 4
@@ -31,8 +31,26 @@ public class App {
         q.setBit(BigNum.BITS - 1, 1);
 
         // p and q are now prime numbers
-        p = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(p);
-        q = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(q);
+//        p = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(p);
+//        q = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(q);
+//        
+//        System.out.println("primes generated");
+        
+        String pPattern = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010001000010010110011111111010110001110001011110011001100011";
+        String qPattern = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001001011011110101100100011111101011111011000001010100110110101011";
+        for (int i = 0; i < pPattern.length(); ++i) {
+            if (pPattern.charAt(i) == '0') {
+                p.setBit(i, 0);
+            } else {
+                p.setBit(i, 1);
+            }
+            
+            if (qPattern.charAt(i) == '0') {
+                q.setBit(i, 0);
+            } else {
+                q.setBit(i, 1);
+            }
+        }
 
 //        p = new BigNum(7, BigNum.BLOCKS - 2);
 //        q = new BigNum(11, BigNum.BLOCKS - 2);
@@ -42,12 +60,12 @@ public class App {
         publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
-        byte[] bytes = new byte[50];
+        byte[] bytes = new byte[300];
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
-//        BigNum[] plainText = converter.convert();
-        BigNum[] plainText = new BigNum[]{new BigNum(20, BigNum.BLOCKS - 2)};
+        BigNum[] plainText = converter.convert();
+//        BigNum[] plainText = new BigNum[]{new BigNum(20, BigNum.BLOCKS - 2)};
 
         // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
@@ -93,7 +111,7 @@ public class App {
             tempP.modulo(publicKey);
             tempP.multiply(yP);
             tempP.modulo(publicKey);
-
+            
             BigNum tempQ = new BigNum(q);
             tempQ.multiply(squareP);
             tempQ.modulo(publicKey);

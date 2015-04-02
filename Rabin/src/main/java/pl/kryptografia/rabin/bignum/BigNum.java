@@ -17,7 +17,7 @@ public class BigNum {
      * 8 blocks = 256 bits
      * 16 blocks = 512 bits
      */
-    public static final int BLOCKS = 4;
+    public static final int BLOCKS = 8;
 
     /**
      * Number of bits in one BigNum.
@@ -83,6 +83,22 @@ public class BigNum {
         copyBlockwise(pattern);
     }
 
+//    private void hasBlockOverflow() {
+//        for (int i = 0; i < BLOCKS; ++i) {
+//            if (number[i] > 4294967295L) {
+//                throw new RuntimeException("Block overflow!");
+//            }
+//        }
+//    }
+
+    private void isMoreThanHalfBig() {
+        for (int i = 0; i < BLOCKS / 2; ++i) {
+            if (number[i] != 0) {
+                throw new RuntimeException("More than half blocks!");
+            }
+        }
+    }
+    
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
@@ -94,6 +110,8 @@ public class BigNum {
      * @param x Multiplier.
      */
     public void multiply(BigNum x) {
+        isMoreThanHalfBig();
+        x.isMoreThanHalfBig();
         BigNum result = new BigNum();
 
         // multiply each block from this number by each block from number x
@@ -230,7 +248,6 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
-
         // we subtract multiples of modulus until we get only the reminder
         while (absGreaterOrEqualTo(modulus)) {
             // get a copy of modulus
