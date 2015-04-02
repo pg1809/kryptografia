@@ -34,6 +34,9 @@ public class App {
         p = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(p);
         q = PrimeGenerator.getInstance().findNotGreaterPrimeModulo4(q);
 
+//        p = new BigNum(7, BigNum.BLOCKS - 2);
+//        q = new BigNum(11, BigNum.BLOCKS - 2);
+        
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
         publicKey.multiply(q);
@@ -43,7 +46,8 @@ public class App {
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
-        BigNum[] plainText = converter.convert();
+//        BigNum[] plainText = converter.convert();
+        BigNum[] plainText = new BigNum[]{new BigNum(20, BigNum.BLOCKS - 2)};
 
         // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
@@ -68,13 +72,13 @@ public class App {
         Pair solution = EuclideanSolver.getInstance().solve(p, q);
         BigNum yP = solution.first;
         BigNum yQ = solution.second;
-
+        
         // we calculate the remainder modulo public key because yP and yQ are
         // used only as a factor in equations calculated modulo public key
         // that way we make sure that all partial result will not overflow
         yP.modulo(publicKey);
         yQ.modulo(publicKey);
-
+        
         BigNum[] decryptedText = new BigNum[cipherText.length];
         int counter = 0;
         for (BigNum encryptedCharacter : cipherText) {

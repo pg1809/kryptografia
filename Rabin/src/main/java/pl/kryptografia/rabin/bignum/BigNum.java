@@ -80,7 +80,7 @@ public class BigNum {
      */
     public BigNum(BigNum pattern) {
         sign = pattern.sign;
-        fillFromBinaryRepresentation(pattern.binaryRepresentation());
+        copyBlockwise(pattern);
     }
 
     /**
@@ -111,7 +111,7 @@ public class BigNum {
             }
         }
 
-        fillFromBinaryRepresentation(result.binaryRepresentation());
+        copyBlockwise(result);
         sign = sign * x.sign;
     }
 
@@ -150,7 +150,7 @@ public class BigNum {
             a.absSubtract(b);
             // absolute value of the result is equal to absolute value of above
             // subtraction
-            fillFromBinaryRepresentation(a.binaryRepresentation());
+            copyBlockwise(a);
 
             // now we need to check if the result is positive or negative
             // |this| >= |x| # this >= 0 # result >= 0
@@ -286,7 +286,7 @@ public class BigNum {
         }
 
         sign *= divisor.sign;
-        fillFromBinaryRepresentation(result.binaryRepresentation());
+        copyBlockwise(result);
     }
 
     /**
@@ -317,7 +317,7 @@ public class BigNum {
             factor.modulo(modulus);
         }
 
-        fillFromBinaryRepresentation(result.binaryRepresentation());
+        copyBlockwise(result);
     }
 
     /**
@@ -451,6 +451,20 @@ public class BigNum {
     private void fillFromBinaryRepresentation(byte[] binaryRepresentation) {
         for (int i = 0; i < binaryRepresentation.length; ++i) {
             setBit(i, binaryRepresentation[i]);
+        }
+    }
+
+    /**
+     * Copies given number's absolute value into this number blocks.
+     *
+     * This method can be used as a clone not changing the original number's
+     * sign.
+     *
+     * @param pattern Number to copy.
+     */
+    private void copyBlockwise(BigNum pattern) {
+        for (int i = 0; i < BLOCKS; ++i) {
+            number[i] = pattern.getBlock(i);
         }
     }
 
