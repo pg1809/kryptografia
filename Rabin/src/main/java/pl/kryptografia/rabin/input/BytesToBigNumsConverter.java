@@ -8,12 +8,12 @@ public class BytesToBigNumsConverter {
      * Bytes per single block of BigNum.
      */
     private final static int BYTES_PER_BLOCK = BigNum.BLOCK_SIZE / 8;
-    
+
     /**
      * BigNum blocks per one data chunk.
      */
     private final static int BLOCKS_PER_CHUNK = BigNum.BLOCKS / 4;
-    
+
     /**
      * Bytes needed to create one chunk of input data.
      */
@@ -34,7 +34,7 @@ public class BytesToBigNumsConverter {
     public BytesToBigNumsConverter(byte[] input) {
         int k = input.length;
         int newBytes = BYTES_PER_CHUNK - k % BYTES_PER_CHUNK;
-        
+
         bytes = new byte[k + newBytes];
         for (int i = 0; i < k; ++i) {
             bytes[i] = input[i];
@@ -51,12 +51,12 @@ public class BytesToBigNumsConverter {
      */
     public BigNum[] convert() {
         int k = bytes.length;
-        
+
         BigNum[] result = new BigNum[k / BYTES_PER_CHUNK];
         for (int i = 0; i < k / BYTES_PER_CHUNK; ++i) {
             result[i] = convertToSingleBigNum(i);
         }
-        
+
         return result;
     }
 
@@ -68,19 +68,21 @@ public class BytesToBigNumsConverter {
      */
     private BigNum convertToSingleBigNum(int index) {
         BigNum result = new BigNum();
-        
+
         int currentByte = index * BYTES_PER_CHUNK;
-        
+
         for (int i = BigNum.BLOCKS - BLOCKS_PER_CHUNK; i < BigNum.BLOCKS; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
-                // 0xFF sorcery lets us treat everything as really unsigned
-                block |= ((bytes[currentByte] & 0xFF) << (24 - 8 * j)) & 0xFF;
+                // 0xFF sorcery lets us treat this byte as really unsigned
+                block |= ((bytes[currentByte] & 0xFF) << (24 - 8 * j));
                 ++currentByte;
             }
-            result.replaceBlock(i, block);
+            // if our long becomes padded with leading ones we need to extract
+            // last 32 bits
+            result.replaceBlock(i, ((block << 32) >>> 32));
         }
-        
+
         return result;
     }
 }
