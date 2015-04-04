@@ -48,7 +48,6 @@ public class App {
 //                q.setBit(i, 1);
 //            }
 //        }
-
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
         publicKey.multiply(q);
@@ -111,31 +110,79 @@ public class App {
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
 
-            // there are 4 possible solutions of decryption
-            BigNum[] possibleText = new BigNum[4];
-
-            possibleText[0] = new BigNum(tempP);
-            possibleText[0].add(tempQ);
-            possibleText[0].modulo(publicKey);
-
-            possibleText[1] = new BigNum(tempP);
-            possibleText[1].subtract(tempQ);
-            possibleText[1].modulo(publicKey);
-
-            possibleText[2] = new BigNum(publicKey);
-            possibleText[2].subtract(possibleText[0]);
-
-            possibleText[3] = new BigNum(publicKey);
-            possibleText[3].subtract(possibleText[1]);
-
-            System.out.println(counter + " : ");
             BigNum current = plainText[counter++];
-            for (int i = 0; i < 4; ++i) {
-                if (possibleText[i].equals(current)) {
-                    System.out.println(i);
-                }
-            }
+            System.out.println(counter + " : ");
+
+            decryptedText[counter-1] = checkPossibleTexts(current, publicKey, tempP, tempQ);
+            System.out.println(decryptedText[counter-1]);
+            
             System.out.println("");
         }
+    }
+
+    /**
+     * Checks which of 4 possible inputs after decryption is the correct one.
+     * 
+     * @param current Actual plain text to compare (TODO: remove it and use hash!).
+     * @param publicKey Public key to decrypt.
+     * @param tempP Coefficient of P to possible solutions.
+     * @param tempQ Coefficient of Q to possible solutions.
+     * @return Correct decrypted text.
+     */
+    private static BigNum checkPossibleTexts(BigNum current, BigNum publicKey, BigNum tempP, BigNum tempQ) {
+        // there are 4 possible solutions of decryption
+        BigNum[] possibleText = new BigNum[4];
+
+        possibleText[0] = new BigNum(tempP);
+        possibleText[0].add(tempQ);
+        possibleText[0].modulo(publicKey);
+
+        if (possibleText[0].getBlock(7) == possibleText[0].calculateHash()) {
+            System.out.println("0");
+            return possibleText[0];
+        }
+        else{
+            System.out.println("7: " + possibleText[0].getBlock(7));
+            System.out.println("H: " + possibleText[0].calculateHash());
+        }
+
+        possibleText[1] = new BigNum(publicKey);
+        possibleText[1].subtract(possibleText[0]);
+
+        if (possibleText[1].getBlock(7) == possibleText[1].calculateHash()) {
+            System.out.println("1");
+            return possibleText[1];
+        }
+        else{
+            System.out.println("7: " + possibleText[1].getBlock(7));
+            System.out.println("H: " + possibleText[1].calculateHash());
+        }
+
+        possibleText[2] = new BigNum(tempP);
+        possibleText[2].subtract(tempQ);
+        possibleText[2].modulo(publicKey);
+
+        if (possibleText[2].getBlock(7) == possibleText[2].calculateHash()) {
+            System.out.println("2");
+            return possibleText[2];
+        }
+        else{
+            System.out.println("7: " + possibleText[2].getBlock(7));
+            System.out.println("H: " + possibleText[2].calculateHash());
+        }
+
+        possibleText[3] = new BigNum(publicKey);
+        possibleText[3].subtract(possibleText[2]);
+
+        if (possibleText[3].getBlock(7) == possibleText[3].calculateHash()) {
+            System.out.println("3");
+            return possibleText[3];
+        }
+        else{
+            System.out.println("7: " + possibleText[3].getBlock(7));
+            System.out.println("H: " + possibleText[3].calculateHash());
+        }
+        
+        return BigNum.ZERO;
     }
 }
