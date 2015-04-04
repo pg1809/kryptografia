@@ -568,13 +568,13 @@ public class BigNum {
 
         return !strict;
     }
-    
+
     /**
      * Calculates hash of two blocks (presicely block 5 and 6).
-     * 
+     *
      * @return Hash of two blocks.
      */
-    public long calculateHash(){
+    public long calculateHash() {
         long firstBlock = getBlock(5);
         long secondBlock = getBlock(6);
         long hash = firstBlock ^ (firstBlock >> 32);

@@ -113,17 +113,18 @@ public class App {
             BigNum current = plainText[counter++];
             System.out.println(counter + " : ");
 
-            decryptedText[counter-1] = checkPossibleTexts(current, publicKey, tempP, tempQ);
-            System.out.println(decryptedText[counter-1]);
-            
+            decryptedText[counter - 1] = checkPossibleTexts(current, publicKey, tempP, tempQ);
+            System.out.println(decryptedText[counter - 1]);
+
             System.out.println("");
         }
     }
 
     /**
      * Checks which of 4 possible inputs after decryption is the correct one.
-     * 
-     * @param current Actual plain text to compare (TODO: remove it and use hash!).
+     *
+     * @param current Actual plain text to compare (TODO: remove it and use
+     * hash!).
      * @param publicKey Public key to decrypt.
      * @param tempP Coefficient of P to possible solutions.
      * @param tempQ Coefficient of Q to possible solutions.
@@ -140,8 +141,7 @@ public class App {
         if (possibleText[0].getBlock(7) == possibleText[0].calculateHash()) {
             System.out.println("0");
             return possibleText[0];
-        }
-        else{
+        } else {
             System.out.println("7: " + possibleText[0].getBlock(7));
             System.out.println("H: " + possibleText[0].calculateHash());
         }
@@ -152,8 +152,7 @@ public class App {
         if (possibleText[1].getBlock(7) == possibleText[1].calculateHash()) {
             System.out.println("1");
             return possibleText[1];
-        }
-        else{
+        } else {
             System.out.println("7: " + possibleText[1].getBlock(7));
             System.out.println("H: " + possibleText[1].calculateHash());
         }
@@ -165,8 +164,7 @@ public class App {
         if (possibleText[2].getBlock(7) == possibleText[2].calculateHash()) {
             System.out.println("2");
             return possibleText[2];
-        }
-        else{
+        } else {
             System.out.println("7: " + possibleText[2].getBlock(7));
             System.out.println("H: " + possibleText[2].calculateHash());
         }
@@ -177,12 +175,11 @@ public class App {
         if (possibleText[3].getBlock(7) == possibleText[3].calculateHash()) {
             System.out.println("3");
             return possibleText[3];
-        }
-        else{
+        } else {
             System.out.println("7: " + possibleText[3].getBlock(7));
             System.out.println("H: " + possibleText[3].calculateHash());
         }
-        
+
         return BigNum.ZERO;
     }
 }
