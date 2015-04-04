@@ -569,10 +569,10 @@ public class BigNum {
      * @return Hash of two blocks.
      */
     public long calculateHash() {
-        long firstBlock = getBlock(5);
-        long secondBlock = getBlock(6);
-        long hash = firstBlock ^ (firstBlock >> 32);
-        hash = 31 * hash + secondBlock ^ (secondBlock >> 32);
+        int firstBlock = (int) getBlock(5);
+        int secondBlock = (int) getBlock(6);
+        long hash = firstBlock ^ (firstBlock >>> 16);
+        hash = 31 * hash + secondBlock ^ (secondBlock >>> 16);
         return extractLast32Bits(hash);
     }
 
