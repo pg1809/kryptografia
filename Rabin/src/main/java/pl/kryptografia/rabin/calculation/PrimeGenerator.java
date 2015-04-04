@@ -44,7 +44,7 @@ public class PrimeGenerator {
      * following way:
      * <code>
      * BigNum x = new BigNum();
-     * x.randomize(BigNum.BLOCKS / 2);
+     * x.randomize(BigNum.BLOCKS / 4);
      * </code>
      *
      * There is a chance of at most 4^(-MILLER_RABIN_CONSTANT) that a complex
@@ -72,6 +72,9 @@ public class PrimeGenerator {
             ++s;
         }
 
+        // TODO: <DUPA> - TO JEST ŹLE. A tak serio to przypominam, że poniżej jest BigNum.BITS / 2,
+        // mimo, że randomizujemy BigNum.BITS / 4. - </DUPA>
+        
         // we get random numbers by randomizing some blocks (half of the blocks
         // - see method description)
         // however x can have leading zeros so we count it not to put ones 

@@ -83,29 +83,6 @@ public class BigNum {
         copyBlockwise(pattern);
     }
 
-//    private void hasBlockOverflow() {
-//        for (int i = 0; i < BLOCKS; ++i) {
-//            if (number[i] > 4294967295L) {
-//                throw new RuntimeException("Block overflow!");
-//            }
-//        }
-//    }
-    private void hasBlockUnderflow() {
-        for (int i = 0; i < BLOCKS; ++i) {
-            if (number[i] < 0) {
-                throw new RuntimeException("Block underflow!");
-            }
-        }
-    }
-
-    private void isMoreThanHalfBig() {
-        for (int i = 0; i < BLOCKS / 2; ++i) {
-            if (number[i] != 0) {
-                throw new RuntimeException("More than half blocks!");
-            }
-        }
-    }
-
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
@@ -117,7 +94,6 @@ public class BigNum {
      * @param x Multiplier.
      */
     public void multiply(BigNum x) {
-        hasBlockUnderflow();
         BigNum result = new BigNum();
 
         // multiply each block from this number by each block from number x
