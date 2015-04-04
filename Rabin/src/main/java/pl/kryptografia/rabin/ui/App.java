@@ -110,27 +110,19 @@ public class App {
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
 
-            BigNum current = plainText[counter++];
-            System.out.println(counter + " : ");
-
-            decryptedText[counter - 1] = checkPossibleTexts(current, publicKey, tempP, tempQ);
-            System.out.println(decryptedText[counter - 1]);
-
-            System.out.println("");
+            decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
         }
     }
 
     /**
-     * Checks which of 4 possible inputs after decryption is the correct one.
+     * Checks which one of 4 possible results of decryption is the correct one.
      *
-     * @param current Actual plain text to compare (TODO: remove it and use
-     * hash!).
-     * @param publicKey Public key to decrypt.
+     * @param publicKey Public key.
      * @param tempP Coefficient of P to possible solutions.
      * @param tempQ Coefficient of Q to possible solutions.
-     * @return Correct decrypted text.
+     * @return Correct decrypted chunk of data.
      */
-    private static BigNum checkPossibleTexts(BigNum current, BigNum publicKey, BigNum tempP, BigNum tempQ) {
+    private static BigNum checkPossibleTexts(BigNum publicKey, BigNum tempP, BigNum tempQ) {
         // there are 4 possible solutions of decryption
         BigNum[] possibleText = new BigNum[4];
 
@@ -139,22 +131,14 @@ public class App {
         possibleText[0].modulo(publicKey);
 
         if (possibleText[0].getBlock(7) == possibleText[0].calculateHash()) {
-            System.out.println("0");
             return possibleText[0];
-        } else {
-            System.out.println("7: " + possibleText[0].getBlock(7));
-            System.out.println("H: " + possibleText[0].calculateHash());
         }
 
         possibleText[1] = new BigNum(publicKey);
         possibleText[1].subtract(possibleText[0]);
 
         if (possibleText[1].getBlock(7) == possibleText[1].calculateHash()) {
-            System.out.println("1");
             return possibleText[1];
-        } else {
-            System.out.println("7: " + possibleText[1].getBlock(7));
-            System.out.println("H: " + possibleText[1].calculateHash());
         }
 
         possibleText[2] = new BigNum(tempP);
@@ -162,24 +146,12 @@ public class App {
         possibleText[2].modulo(publicKey);
 
         if (possibleText[2].getBlock(7) == possibleText[2].calculateHash()) {
-            System.out.println("2");
             return possibleText[2];
-        } else {
-            System.out.println("7: " + possibleText[2].getBlock(7));
-            System.out.println("H: " + possibleText[2].calculateHash());
         }
 
         possibleText[3] = new BigNum(publicKey);
         possibleText[3].subtract(possibleText[2]);
 
-        if (possibleText[3].getBlock(7) == possibleText[3].calculateHash()) {
-            System.out.println("3");
-            return possibleText[3];
-        } else {
-            System.out.println("7: " + possibleText[3].getBlock(7));
-            System.out.println("H: " + possibleText[3].calculateHash());
-        }
-
-        return BigNum.ZERO;
+        return possibleText[3];
     }
 }

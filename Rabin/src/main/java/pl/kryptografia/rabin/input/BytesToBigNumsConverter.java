@@ -101,7 +101,6 @@ public class BytesToBigNumsConverter {
      */
     private BigNum addHashToBigNum(BigNum input) {
         long hash = input.calculateHash();
-        System.out.println("H: " + hash);
         input.replaceBlock(7, hash);
         return input;
     }

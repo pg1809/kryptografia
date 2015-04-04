@@ -100,12 +100,6 @@ public class BigNum {
         // only non-zero blocks are considered (see method description)
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
-                if (number[i] < 0 || x.number[j] < 0) {
-                    System.out.println("minus");
-                    System.out.println(number[i]);
-                    System.out.println(x.number[j]);
-                    System.out.println("");
-                }
                 long product = number[i] * x.number[j];
 
                 // when two blocks are multiplied their positions need to be 
@@ -579,7 +573,7 @@ public class BigNum {
         long secondBlock = getBlock(6);
         long hash = firstBlock ^ (firstBlock >> 32);
         hash = 31 * hash + secondBlock ^ (secondBlock >> 32);
-        return hash;
+        return extractLast32Bits(hash);
     }
 
     @Override
