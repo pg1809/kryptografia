@@ -115,6 +115,10 @@ public class BigNum {
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
                 long product = number[i] * x.number[j];
+                
+                if (product == 0) {
+                    continue;
+                }
 
                 // when two blocks are multiplied their positions need to be 
                 // considered to shift the result left properly
