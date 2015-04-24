@@ -58,7 +58,7 @@ public class BytesToBigNumsConverter {
         BigNum[] result = new BigNum[k / BYTES_PER_CHUNK];
         for (int i = 0; i < k / BYTES_PER_CHUNK; ++i) {
             result[i] = convertToSingleBigNum(i);
-            addHashToBigNum(result[i]);
+//            addHashToBigNum(result[i]);
         }
 
         return result;

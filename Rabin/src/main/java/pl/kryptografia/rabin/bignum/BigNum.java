@@ -16,8 +16,12 @@ public class BigNum {
      * 4 blocks = 128 bits
      * 8 blocks = 256 bits
      * 16 blocks = 512 bits
+     * 32 blocks = 1024 bits
+     * 64 blocks = 2048 bits
+     * 128 blocks = 4096 bits
+     * 256 blocks = 8192 bits
      */
-    public static final int BLOCKS = 8;
+    public static final int BLOCKS = 128;
 
     /**
      * Number of bits in one BigNum.
@@ -45,7 +49,7 @@ public class BigNum {
     /**
      * Random bits generator.
      */
-    private final SecureRandom generator = new SecureRandom();
+    private final static SecureRandom generator = new SecureRandom();
 
     /**
      * Number's sign (+1 or -1).
