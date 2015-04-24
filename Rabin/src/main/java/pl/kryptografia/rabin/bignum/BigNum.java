@@ -3,7 +3,12 @@ package pl.kryptografia.rabin.bignum;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
+/**
+ * Custom implementation of big integers.
+ */
 public class BigNum {
+
+    public static int methodCounter = 0;
 
     /**
      * Block size in bits.
@@ -29,6 +34,19 @@ public class BigNum {
     public static final int BITS = BLOCKS * BLOCK_SIZE;
 
     /**
+     * Binary representation of the number.
+     *
+     * Each block consists of 64 bits but only least significant 32 of each are
+     * relevant.
+     */
+    private final long[] number = new long[BLOCKS];
+
+    /**
+     * Number's sign (+1 or -1).
+     */
+    private int sign = 1;
+
+    /**
      * BigNum representing 0.
      */
     public static final BigNum ZERO = new BigNum();
@@ -39,28 +57,19 @@ public class BigNum {
     public static final BigNum ONE = new BigNum(1, BLOCKS - 2);
 
     /**
-     * Binary representation of the number.
-     *
-     * Each block consists of 64 bits but only least significant 32 of each are
-     * relevant.
-     */
-    private final long[] number = new long[BLOCKS];
-
-    /**
      * Random bits generator.
      */
     private final static SecureRandom generator = new SecureRandom();
 
     /**
-     * Number's sign (+1 or -1).
+     * Pool used for creating temporary big integers.
      */
-    private int sign = 1;
+    private final static BigNumPool pool = BigNumPool.getInstance();
 
     /**
      * Creates a big number equal to 0.
      */
     public BigNum() {
-        fillWithZeros();
     }
 
     /**
@@ -73,8 +82,7 @@ public class BigNum {
      * @param firstBlock Number of the first block of initial value.
      */
     public BigNum(long initialValue, int firstBlock) {
-        number[firstBlock + 1] = extractLast32Bits(initialValue);
-        number[firstBlock] = (initialValue >>> 32);
+        initializeFromLong(initialValue, firstBlock);
     }
 
     /**
@@ -83,8 +91,7 @@ public class BigNum {
      * @param pattern Big number to be duplicated.
      */
     public BigNum(BigNum pattern) {
-        sign = pattern.sign;
-        copyBlockwise(pattern);
+        initializeFromBigNum(pattern);
     }
 
     /**
@@ -98,7 +105,10 @@ public class BigNum {
      * @param x Multiplier.
      */
     public void multiply(BigNum x) {
-        BigNum result = new BigNum();
+        pool.open();
+
+        BigNum result = pool.get();
+        result.initializeFromBigNum(BigNum.ZERO);
 
         // multiply each block from this number by each block from number x
         // only non-zero blocks are considered (see method description)
@@ -111,13 +121,16 @@ public class BigNum {
                 int position = i + j - BLOCKS;
 
                 // add the result of this multiplication to the global result
-                BigNum y = new BigNum(product, position);
+                BigNum y = pool.get();
+                y.initializeFromLong(product, position);
                 result.add(y);
             }
         }
 
         copyBlockwise(result);
         sign = sign * x.sign;
+
+        pool.close();
     }
 
     /**
@@ -126,6 +139,7 @@ public class BigNum {
      * @param x Value to add to this number.
      */
     public void add(BigNum x) {
+
         if (sign == x.sign) {
             // when both numbers are positive or negative it is just a simple 
             // bitwise sum
@@ -143,10 +157,12 @@ public class BigNum {
             // constitute which one is greater as per its absolute value
             BigNum a = new BigNum(this);
             BigNum b = new BigNum(x);
+
             boolean thisIsGreater = true;
+
             if (!absGreaterOrEqualTo(x)) {
-                a = new BigNum(x);
-                b = new BigNum(this);
+                a.initializeFromBigNum(x);
+                b.initializeFromBigNum(this);
                 thisIsGreater = false;
             }
             // now we are sure that |a| >= |b|
@@ -179,12 +195,17 @@ public class BigNum {
      * @param x Subtrahent.
      */
     public void subtract(BigNum x) {
-        BigNum y = new BigNum(x);
+        pool.open();
+
+        BigNum y = pool.get();
+        y.initializeFromBigNum(x);
 
         // add function handles all combinations of positive and negative 
         // numbers so we replace subtraction with addition
         y.setSign(-y.sign);
         add(y);
+
+        pool.close();
     }
 
     /**
@@ -235,10 +256,14 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
+        pool.open();
+
         // we subtract multiples of modulus until we get only the reminder
         while (absGreaterOrEqualTo(modulus)) {
             // get a copy of modulus
-            BigNum x = new BigNum(modulus);
+            BigNum x = pool.get();
+            x.initializeFromBigNum(modulus);
+
             // shift modulus left as much as you can
             // this operation is equivalent to finding modulus * 2^k with the
             // greatest k possible
@@ -254,6 +279,8 @@ public class BigNum {
             add(modulus);
             sign = 1;
         }
+
+        pool.close();
     }
 
     /**
@@ -262,13 +289,17 @@ public class BigNum {
      * @param divisor Number to divide by.
      */
     public void divide(BigNum divisor) {
-        BigNum result = new BigNum();
+        pool.open();
+
+        BigNum result = pool.get();
+        result.initializeFromBigNum(BigNum.ZERO);
 
         // we subtract multiples of divisor from the initial number and remember
         // how many times divisor we subtracted
         while (absGreaterOrEqualTo(divisor)) {
             // get a copy of divisor
-            BigNum x = new BigNum(divisor);
+            BigNum x = pool.get();
+            x.initializeFromBigNum(divisor);
             // shift divisor left as much as you can
             // this operation is equivalent to finding divisor * 2^k with the
             // greatest k possible
@@ -291,6 +322,8 @@ public class BigNum {
 
         sign *= divisor.sign;
         copyBlockwise(result);
+
+        pool.close();
     }
 
     /**
@@ -383,22 +416,42 @@ public class BigNum {
      * @return Maximum shift (or -1 if x is greater than this number).
      */
     private int findMaximumLeftShift(BigNum x) {
+
         // if x is already greater than this number return -1
         int shift = -1;
 
+        if (!absGreaterOrEqualTo(x)) {
+            return shift;
+        }
+        
+        shift = 0;
+        
+        // create a copy of x not to shift the original
         BigNum xCopy = new BigNum(x);
 
-        while (absGreaterOrEqualTo(xCopy)) {
-            ++shift;
+        // count leading zeros to make the initial shift
+        int myLeadingZeros = countLeadingZeros();
+        int xLeadingZeros = xCopy.countLeadingZeros();
 
-            // if the first bit is 1 we cannot shift left anymore because we get 
-            // overflow
-            if (xCopy.getBit(0) == 1) {
-                return shift;
-            }
-            xCopy.shiftLeft(1);
+        // if this condition is true we can safely shift x and still be sure
+        // that it is less than this number
+        if (xLeadingZeros > myLeadingZeros + 1) {
+            shift = xLeadingZeros - myLeadingZeros - 1;
+            xCopy.shiftLeft(shift);
         }
-
+        
+        // in the most significant bit is 1 we cannot shift left anymore
+        if (xCopy.getBit(0) == 1) {
+            return shift;
+        }
+        
+        // check if we can make one more shift
+        xCopy.shiftLeft(1);
+        
+        if (absGreaterOrEqualTo(xCopy)) {
+            ++shift;
+        }
+        
         return shift;
     }
 
@@ -473,14 +526,26 @@ public class BigNum {
     }
 
     /**
-     * Fills all bit with zeros.
+     * Puts given long number into two blocks of given position and nullify
+     * other blocks.
      *
-     * Includes not used 32 most significant bits of each block.
+     * @param initialValue Long value to put.
+     * @param firstBlock First block to put long into.
      */
-    private void fillWithZeros() {
-        for (int i = 0; i < BLOCKS; ++i) {
-            number[i] = 0;
-        }
+    private void initializeFromLong(long initialValue, int firstBlock) {
+        copyBlockwise(BigNum.ZERO);
+        number[firstBlock + 1] = extractLast32Bits(initialValue);
+        number[firstBlock] = (initialValue >>> 32);
+    }
+
+    /**
+     * This big integer becomes a copy of a given big integer.
+     *
+     * @param pattern Big integer to copy.
+     */
+    private void initializeFromBigNum(BigNum pattern) {
+        sign = pattern.sign;
+        copyBlockwise(pattern);
     }
 
     /**
@@ -553,18 +618,36 @@ public class BigNum {
      * (only absolute values are concerned).
      */
     private boolean absGreaterParametrized(BigNum x, boolean strict) {
-        byte[] me = binaryRepresentation();
-        byte[] other = x.binaryRepresentation();
 
-        for (int i = 0; i < me.length; ++i) {
-            if (me[i] < other[i]) {
+        for (int i = 0; i < BLOCKS; ++i) {
+            if (number[i] < x.number[i]) {
                 return false;
-            } else if (me[i] > other[i]) {
+            } else if (number[i] > x.number[i]) {
                 return true;
             }
         }
 
         return !strict;
+    }
+
+    /**
+     * Returns the number of leading zeros in this big integer.
+     *
+     * @return Number of leading zeros in this big integer.
+     */
+    private int countLeadingZeros() {
+        int counter = 0;
+
+        byte[] binaryRepresentation = binaryRepresentation();
+        for (byte b : binaryRepresentation) {
+            if (b == 0) {
+                ++counter;
+            } else {
+                return counter;
+            }
+        }
+
+        return counter;
     }
 
     /**

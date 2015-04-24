@@ -1,11 +1,9 @@
 package pl.kryptografia.rabin.ui;
 
-import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
 import pl.kryptografia.rabin.calculation.Pair;
-import pl.kryptografia.rabin.calculation.PrimeGenerator;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 public class App {
@@ -13,7 +11,7 @@ public class App {
     private static final Random generator = new Random();
 
     public static void main(String[] args) {
-
+        
         // p and q are factors of the public key
         BigNum p = new BigNum();
         BigNum q = new BigNum();
@@ -68,7 +66,7 @@ public class App {
                 q.setBit(i, 1);
             }
         }
-        
+
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
         publicKey.multiply(q);
@@ -96,40 +94,52 @@ public class App {
         BigNum exponentQ = new BigNum(q);
         exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
-
+        
         // extended Euclidean algorithm
         // we search for yP and yQ such that:
         // yP * p + yQ * q = 1
         Pair solution = EuclideanSolver.getInstance().solve(p, q);
         BigNum yP = solution.first;
         BigNum yQ = solution.second;
+        
+        System.err.println("After euclidean solver");
 
         // we calculate the remainder modulo public key because yP and yQ are
         // used only as a factor in equations calculated modulo public key
         // that way we make sure that all partial result will not overflow
         yP.modulo(publicKey);
         yQ.modulo(publicKey);
+        
+        System.err.println("After computing modulos");
 
         BigNum[] decryptedText = new BigNum[cipherText.length];
         int counter = 0;
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);
             squareP.powerModulo(exponentP, p);
+            
+            System.err.println("squareP");
 
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
+            
+            System.err.println("squareQ");
 
             BigNum tempP = new BigNum(p);
             tempP.multiply(squareQ);
             tempP.modulo(publicKey);
             tempP.multiply(yP);
             tempP.modulo(publicKey);
+            
+            System.err.println("tempP");
 
             BigNum tempQ = new BigNum(q);
             tempQ.multiply(squareP);
             tempQ.modulo(publicKey);
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
+            
+            System.err.println("tempQ");
 
 //            decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
             System.err.println(counter++);

@@ -60,7 +60,6 @@ public class EuclideanSolver {
         BigNum w = new BigNum(BigNum.ONE);
 
         while (!stack.isEmpty()) {
-            BigNum f = stack.peek().first;
             BigNum s = stack.peek().second;
             stack.pop();
 
