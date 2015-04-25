@@ -18,13 +18,9 @@ public class BigNum {
     /**
      * Number of 32 bit blocks.
      *
-     * 4 blocks = 128 bits
-     * 8 blocks = 256 bits
-     * 16 blocks = 512 bits
-     * 32 blocks = 1024 bits
-     * 64 blocks = 2048 bits
-     * 128 blocks = 4096 bits
-     * 256 blocks = 8192 bits
+     * 4 blocks = 128 bits 8 blocks = 256 bits 16 blocks = 512 bits 32 blocks =
+     * 1024 bits 64 blocks = 2048 bits 128 blocks = 4096 bits 256 blocks = 8192
+     * bits
      */
     public static final int BLOCKS = 128;
 
@@ -115,7 +111,7 @@ public class BigNum {
         for (int i = BLOCKS / 2; i < BLOCKS; ++i) {
             for (int j = BLOCKS / 2; j < BLOCKS; ++j) {
                 long product = number[i] * x.number[j];
-                
+
                 if (product == 0) {
                     continue;
                 }
@@ -427,9 +423,9 @@ public class BigNum {
         if (!absGreaterOrEqualTo(x)) {
             return shift;
         }
-        
+
         shift = 0;
-        
+
         // create a copy of x not to shift the original
         BigNum xCopy = new BigNum(x);
 
@@ -443,19 +439,19 @@ public class BigNum {
             shift = xLeadingZeros - myLeadingZeros - 1;
             xCopy.shiftLeft(shift);
         }
-        
+
         // in the most significant bit is 1 we cannot shift left anymore
         if (xCopy.getBit(0) == 1) {
             return shift;
         }
-        
+
         // check if we can make one more shift
         xCopy.shiftLeft(1);
-        
+
         if (absGreaterOrEqualTo(xCopy)) {
             ++shift;
         }
-        
+
         return shift;
     }
 
@@ -655,16 +651,18 @@ public class BigNum {
     }
 
     /**
-     * Calculates hash of two blocks (presicely block 5 and 6).
+     * Calculates hash of input blocks (precisely starting from block 96).
      *
-     * @return Hash of two blocks.
+     * @param dataSizeInBlocks Size of data to hash in blocks.
+     * @return Hash of blocks.
      */
-    public long calculateHash() {
-        int firstBlock = (int) getBlock(5);
-        int secondBlock = (int) getBlock(6);
-        long hash = firstBlock ^ (firstBlock >>> 16);
-        hash = 31 * hash + secondBlock ^ (secondBlock >>> 16);
-        return extractLast32Bits(hash);
+    public long calculateHash(int dataSizeInBlocks) {
+        long hashCode = 0;
+        for (int i = 0; i < dataSizeInBlocks; i++) {
+            hashCode = 31 * hashCode + (getBlock(96 + i) & 0xffffffffL);
+        }
+        System.err.println("HC: " + (hashCode * sign));
+        return hashCode * sign;
     }
 
     @Override

@@ -8,11 +8,16 @@ public class BytesToBigNumsConverter {
      * Bytes per single block of BigNum.
      */
     private final static int BYTES_PER_BLOCK = BigNum.BLOCK_SIZE / 8;
+    
+    /**
+     * BigNum blocks of hash.
+     */
+    public final static int HASH_BLOCKS = 2;
 
     /**
      * BigNum blocks per one data chunk.
      */
-    private final static int BLOCKS_PER_CHUNK = BigNum.BLOCKS / 4;
+    public final static int BLOCKS_PER_CHUNK = BigNum.BLOCKS / 4 - HASH_BLOCKS;
 
     /**
      * Bytes needed to create one chunk of input data.
@@ -58,7 +63,7 @@ public class BytesToBigNumsConverter {
         BigNum[] result = new BigNum[k / BYTES_PER_CHUNK];
         for (int i = 0; i < k / BYTES_PER_CHUNK; ++i) {
             result[i] = convertToSingleBigNum(i);
-//            addHashToBigNum(result[i]);
+            addHashToBigNum(result[i]);
         }
 
         return result;
@@ -75,7 +80,7 @@ public class BytesToBigNumsConverter {
 
         int currentByte = index * BYTES_PER_CHUNK;
 
-        for (int i = BigNum.BLOCKS - BLOCKS_PER_CHUNK - 1; i < BigNum.BLOCKS - 1; ++i) {
+        for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS) - 1; i < BigNum.BLOCKS - HASH_BLOCKS - 1; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                 // 0xFF sorcery lets us treat this byte as really unsigned
@@ -91,17 +96,22 @@ public class BytesToBigNumsConverter {
     }
 
     /**
-     * For given big number inserts into the 7-th block hash of blocks 5 and 6.
+     * For given big number inserts into the last two block hash of blocks 80-111.
      *
-     * This method assumes that the initial BigNum consists of two blocks (block
-     * number 5 and 6) and adds hash of them in block 7.
+     * This method assumes that the initial BigNum consists of blocks 80-111 
+     * and adds hash of them in last two blocks.
      *
-     * @param input BigNum without hash at last block.
-     * @return BigNum with added hash at last block.
+     * @param input BigNum without hash at last two blocks.
+     * @return BigNum with added hash at last two blocks.
      */
     private BigNum addHashToBigNum(BigNum input) {
-        long hash = input.calculateHash();
-        input.replaceBlock(7, hash);
+        long hash = input.calculateHash(BLOCKS_PER_CHUNK);
+        long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+        long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+        System.err.println("FHB: " + firstHashBlock);
+        System.err.println("SHB: " + secondHashBlock);
+        input.replaceBlock(BigNum.BLOCKS - 2, firstHashBlock);
+        input.replaceBlock(BigNum.BLOCKS - 1, secondHashBlock);
         return input;
     }
 }

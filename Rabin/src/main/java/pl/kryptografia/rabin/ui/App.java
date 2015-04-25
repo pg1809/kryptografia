@@ -7,11 +7,11 @@ import pl.kryptografia.rabin.calculation.Pair;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 public class App {
-
+    
     private static final Random generator = new Random();
-
+    
     public static void main(String[] args) {
-        
+
         // p and q are factors of the public key
         BigNum p = new BigNum();
         BigNum q = new BigNum();
@@ -59,7 +59,7 @@ public class App {
             } else {
                 p.setBit(i, 1);
             }
-
+            
             if (qPattern.charAt(i) == '0') {
                 q.setBit(i, 0);
             } else {
@@ -74,7 +74,7 @@ public class App {
         // Generate random input and split it into BigNum chunks
         byte[] bytes = new byte[200];
         generator.nextBytes(bytes);
-
+        
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
 
@@ -90,11 +90,11 @@ public class App {
         BigNum exponentP = new BigNum(p);
         exponentP.add(BigNum.ONE);
         exponentP.shiftRight(2);
-
+        
         BigNum exponentQ = new BigNum(q);
         exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
-        
+
         // extended Euclidean algorithm
         // we search for yP and yQ such that:
         // yP * p + yQ * q = 1
@@ -111,38 +111,37 @@ public class App {
         yQ.modulo(publicKey);
         
         System.err.println("After computing modulos");
-
+        
         BigNum[] decryptedText = new BigNum[cipherText.length];
         int counter = 0;
-        for (BigNum encryptedCharacter : cipherText) {
+        for (BigNum encryptedCharacter : cipherText) {           
             BigNum squareP = new BigNum(encryptedCharacter);
+//            System.err.println("BEFORE--------------squareP = " + squareP);
             squareP.powerModulo(exponentP, p);
+//            System.err.println("AFTER---------------squareP = " + squareP);
             
-            System.err.println("squareP");
-
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
             
-            System.err.println("squareQ");
-
+            System.err.println("squareQ = " + squareQ);
+            
             BigNum tempP = new BigNum(p);
             tempP.multiply(squareQ);
             tempP.modulo(publicKey);
             tempP.multiply(yP);
             tempP.modulo(publicKey);
             
-            System.err.println("tempP");
-
+            System.err.println("tempP = " + tempP);
+            
             BigNum tempQ = new BigNum(q);
             tempQ.multiply(squareP);
             tempQ.modulo(publicKey);
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
             
-            System.err.println("tempQ");
-
-//            decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
-            System.err.println(counter++);
+            System.err.println("tempQ = " + tempQ);
+            
+            decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
         }
     }
 
@@ -157,33 +156,60 @@ public class App {
     private static BigNum checkPossibleTexts(BigNum publicKey, BigNum tempP, BigNum tempQ) {
         // there are 4 possible solutions of decryption
         BigNum[] possibleText = new BigNum[4];
-
+        
         possibleText[0] = new BigNum(tempP);
         possibleText[0].add(tempQ);
         possibleText[0].modulo(publicKey);
-
-        if (possibleText[0].getBlock(7) == possibleText[0].calculateHash()) {
+        
+//        System.err.println("tempP " + tempP);
+//        System.err.println("tempQ " + tempQ);
+        
+        long hash = possibleText[0].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
+        long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+        long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+        
+        if (possibleText[0].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
+                && possibleText[0].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
             return possibleText[0];
         }
-
+        
         possibleText[1] = new BigNum(publicKey);
         possibleText[1].subtract(possibleText[0]);
-
-        if (possibleText[1].getBlock(7) == possibleText[1].calculateHash()) {
+        
+        hash = possibleText[1].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
+        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+        
+        if (possibleText[1].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
+                && possibleText[1].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
             return possibleText[1];
         }
-
+        
         possibleText[2] = new BigNum(tempP);
         possibleText[2].subtract(tempQ);
         possibleText[2].modulo(publicKey);
-
-        if (possibleText[2].getBlock(7) == possibleText[2].calculateHash()) {
+        
+        hash = possibleText[2].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
+        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+        
+        if (possibleText[2].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
+                && possibleText[2].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
             return possibleText[2];
         }
-
+        
         possibleText[3] = new BigNum(publicKey);
         possibleText[3].subtract(possibleText[2]);
-
-        return possibleText[3];
+        
+        hash = possibleText[3].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
+        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+        
+        if (possibleText[3].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
+                && possibleText[3].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
+            return possibleText[3];
+        }
+        
+        return BigNum.ZERO;
     }
 }
