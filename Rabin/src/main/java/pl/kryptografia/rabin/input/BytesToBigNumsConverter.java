@@ -107,7 +107,7 @@ public class BytesToBigNumsConverter {
         long hashCode = 0;
         int startingDataBlock = BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS);
         for (int i = 0; i < dataSizeInBlocks; i++) {            
-            hashCode = 31 * hashCode + (input.getBlock(startingDataBlock -  + i) & 0xffffffffL);
+            hashCode = 31 * hashCode + (input.getBlock(startingDataBlock + i) & 0xffffffffL);
         }
         System.err.println("HC: " + (hashCode * input.getSign()));
         return hashCode * input.getSign();
