@@ -2,6 +2,7 @@ package pl.kryptografia.rabin.bignum;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 /**
  * Custom implementation of big integers.
@@ -648,22 +649,7 @@ public class BigNum {
         }
 
         return counter;
-    }
-
-    /**
-     * Calculates hash of input blocks (precisely starting from block 96).
-     *
-     * @param dataSizeInBlocks Size of data to hash in blocks.
-     * @return Hash of blocks.
-     */
-    public long calculateHash(int dataSizeInBlocks) {
-        long hashCode = 0;
-        for (int i = 0; i < dataSizeInBlocks; i++) {
-            hashCode = 31 * hashCode + (getBlock(96 + i) & 0xffffffffL);
-        }
-        System.err.println("HC: " + (hashCode * sign));
-        return hashCode * sign;
-    }
+    }    
 
     @Override
     public String toString() {

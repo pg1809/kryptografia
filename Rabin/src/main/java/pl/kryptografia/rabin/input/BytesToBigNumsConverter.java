@@ -1,6 +1,7 @@
 package pl.kryptografia.rabin.input;
 
 import pl.kryptografia.rabin.bignum.BigNum;
+import static pl.kryptografia.rabin.bignum.BigNum.BLOCKS;
 
 public class BytesToBigNumsConverter {
 
@@ -80,7 +81,7 @@ public class BytesToBigNumsConverter {
 
         int currentByte = index * BYTES_PER_CHUNK;
 
-        for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS) - 1; i < BigNum.BLOCKS - HASH_BLOCKS - 1; ++i) {
+        for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS - HASH_BLOCKS - 1; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                 // 0xFF sorcery lets us treat this byte as really unsigned
@@ -94,6 +95,23 @@ public class BytesToBigNumsConverter {
 
         return result;
     }
+    
+    /**
+     * Calculates hash of input blocks.
+     *
+     * @param input BigNum to calculate hash.
+     * @param dataSizeInBlocks Size of data to hash in blocks.
+     * @return Hash of blocks.
+     */
+    public static long calculateHash(BigNum input, int dataSizeInBlocks) {
+        long hashCode = 0;
+        int startingDataBlock = BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS);
+        for (int i = 0; i < dataSizeInBlocks; i++) {            
+            hashCode = 31 * hashCode + (input.getBlock(startingDataBlock -  + i) & 0xffffffffL);
+        }
+        System.err.println("HC: " + (hashCode * input.getSign()));
+        return hashCode * input.getSign();
+    }
 
     /**
      * For given big number inserts into the last two block hash of blocks 80-111.
@@ -105,7 +123,7 @@ public class BytesToBigNumsConverter {
      * @return BigNum with added hash at last two blocks.
      */
     private BigNum addHashToBigNum(BigNum input) {
-        long hash = input.calculateHash(BLOCKS_PER_CHUNK);
+        long hash = calculateHash(input, BLOCKS_PER_CHUNK);
         long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
         long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
         System.err.println("FHB: " + firstHashBlock);

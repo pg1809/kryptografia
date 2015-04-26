@@ -164,50 +164,15 @@ public class App {
 //        System.err.println("tempP " + tempP);
 //        System.err.println("tempQ " + tempQ);
         
-        long hash = possibleText[0].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
-        long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
-        long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
-        
-        if (possibleText[0].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
-                && possibleText[0].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
-            return possibleText[0];
-        }
-        
-        possibleText[1] = new BigNum(publicKey);
-        possibleText[1].subtract(possibleText[0]);
-        
-        hash = possibleText[1].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
-        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
-        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
-        
-        if (possibleText[1].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
-                && possibleText[1].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
-            return possibleText[1];
-        }
-        
-        possibleText[2] = new BigNum(tempP);
-        possibleText[2].subtract(tempQ);
-        possibleText[2].modulo(publicKey);
-        
-        hash = possibleText[2].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
-        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
-        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
-        
-        if (possibleText[2].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
-                && possibleText[2].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
-            return possibleText[2];
-        }
-        
-        possibleText[3] = new BigNum(publicKey);
-        possibleText[3].subtract(possibleText[2]);
-        
-        hash = possibleText[3].calculateHash(BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
-        firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
-        secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
-        
-        if (possibleText[3].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
-                && possibleText[3].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
-            return possibleText[3];
+        for(int i=0; i<4; ++i){        
+            long hash = BytesToBigNumsConverter.calculateHash(possibleText[i], BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
+            long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
+            long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
+
+            if (possibleText[i].getBlock(BigNum.BLOCKS - 2) == firstHashBlock
+                    && possibleText[i].getBlock(BigNum.BLOCKS - 1) == secondHashBlock) {
+                return possibleText[i];
+            }
         }
         
         return BigNum.ZERO;
