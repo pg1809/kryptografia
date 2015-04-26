@@ -81,7 +81,7 @@ public class BytesToBigNumsConverter {
 
         int currentByte = index * BYTES_PER_CHUNK;
 
-        for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS - HASH_BLOCKS - 1; ++i) {
+        for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS - HASH_BLOCKS; ++i) {
             long block = 0;
             for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                 // 0xFF sorcery lets us treat this byte as really unsigned
