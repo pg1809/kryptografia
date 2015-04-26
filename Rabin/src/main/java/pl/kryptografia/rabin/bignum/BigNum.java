@@ -2,14 +2,11 @@ package pl.kryptografia.rabin.bignum;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
-import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 /**
  * Custom implementation of big integers.
  */
 public class BigNum {
-
-    public static int methodCounter = 0;
 
     /**
      * Block size in bits.
@@ -19,9 +16,9 @@ public class BigNum {
     /**
      * Number of 32 bit blocks.
      *
-     * 4 blocks = 128 bits 8 blocks = 256 bits 16 blocks = 512 bits 32 blocks =
-     * 1024 bits 64 blocks = 2048 bits 128 blocks = 4096 bits 256 blocks = 8192
-     * bits
+     * 4 blocks = 128 bits, 8 blocks = 256 bits, 16 blocks = 512 bits, 32 blocks
+     * = 1024 bits, 64 blocks = 2048 bits, 128 blocks = 4096 bits, 256 blocks =
+     * 8192 bits
      */
     public static final int BLOCKS = 128;
 
@@ -649,7 +646,7 @@ public class BigNum {
         }
 
         return counter;
-    }    
+    }
 
     @Override
     public String toString() {
