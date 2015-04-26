@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.ui;
 
+import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
@@ -121,12 +122,19 @@ public class App {
             BigNum squareP = new BigNum(encryptedCharacter);
 //            System.err.println("BEFORE--------------squareP = " + squareP);
             squareP.powerModulo(exponentP, p);
-//            System.err.println("AFTER---------------squareP = " + squareP);
+            
+            BigInteger result = new BigInteger(encryptedCharacter.toString(), 2);
+            result = result.modPow(new BigInteger(exponentP.toString(), 2), new BigInteger(p.toString(), 2));
+            System.err.println("AFTER---------------squareP = " + squareP);
+            System.err.println("AFTER---------------result = " + result.toString(2));
             
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
             
+            result = new BigInteger(encryptedCharacter.toString(), 2);
+            result = result.modPow(new BigInteger(exponentQ.toString(), 2), new BigInteger(q.toString(), 2));
             System.err.println("squareQ = " + squareQ);
+            System.err.println("result = " + result.toString(2));
             
             BigNum tempP = new BigNum(p);
             tempP.multiply(squareQ);
@@ -134,7 +142,14 @@ public class App {
             tempP.multiply(yP);
             tempP.modulo(publicKey);
             
+            result = new BigInteger(p.toString(), 2);
+            result = result.multiply(new BigInteger(squareQ.toString(), 2));
+            result = result.mod(new BigInteger(publicKey.toString(), 2));
+            result = result.multiply(new BigInteger(yP.toString(), 2));
+            result = result.mod(new BigInteger(publicKey.toString(), 2));
+            
             System.err.println("tempP = " + tempP);
+            System.err.println("result = " + result.toString(2));
             
             BigNum tempQ = new BigNum(q);
             tempQ.multiply(squareP);
@@ -142,7 +157,14 @@ public class App {
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
             
+            result = new BigInteger(q.toString(), 2);
+            result = result.multiply(new BigInteger(squareP.toString(), 2));
+            result = result.mod(new BigInteger(publicKey.toString(), 2));
+            result = result.multiply(new BigInteger(yQ.toString(), 2));
+            result = result.mod(new BigInteger(publicKey.toString(), 2));
+            
             System.err.println("tempQ = " + tempQ);
+            System.err.println("result = " + result.toString(2));
             
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
         }
