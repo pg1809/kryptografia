@@ -224,6 +224,8 @@ public class BigNum {
                 // significant block
                 number[i] += (1L << 32);
             }
+            // now we are sure that our block is greater then corresponding 
+            // block in x
             number[i] -= x.number[i];
         }
     }
