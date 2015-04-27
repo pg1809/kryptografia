@@ -71,9 +71,6 @@ public class PrimeGenerator {
             d.shiftRight(1);
             ++s;
         }
-
-        // TODO: <DUPA> - TO JEST ŹLE. A tak serio to przypominam, że poniżej jest BigNum.BITS / 2,
-        // mimo, że randomizujemy BigNum.BITS / 4. - </DUPA>
         
         // we get random numbers by randomizing some blocks (half of the blocks
         // - see method description)
