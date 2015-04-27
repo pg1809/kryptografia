@@ -213,37 +213,19 @@ public class BigNum {
      * @param x Value to subtract from this number.
      */
     public void absSubtract(BigNum x) {
-        // minuend - subtrahent = result
-        byte[] minuend = binaryRepresentation();
-        byte[] subtrahent = x.binaryRepresentation();
-        byte[] result = new byte[minuend.length];
-
-        byte borrowed = 0;
-        // we start from the least significant bit and perform bitwise
-        // subtraction
-        for (int i = minuend.length - 1; i >= 0; --i) {
-            // if we 'borrowed' 1 in the last step we need to pay now
-            minuend[i] -= borrowed;
-            // simple subtraction
-            minuend[i] -= subtrahent[i];
-
-            switch (minuend[i]) {
-                case -2:
-                    result[i] = 0;
-                    borrowed = 1;
-                    break;
-                case -1:
-                    result[i] = 1;
-                    borrowed = 1;
-                    break;
-                default:
-                    result[i] = minuend[i];
-                    borrowed = 0;
-                    break;
+        // we subtract block by block, starting from the least significant ones
+        for (int i = 0; i < BLOCKS; ++i) {
+            // if our block is lesser than corresponding block from x, we need 
+            // to borrow one bit
+            if (number[i] < x.number[i]) {
+                // least significant bit in the previous block is worth 1
+                --number[i - 1];
+                // for us it is worth 2^33 because it is taken from more 
+                // significant block
+                number[i] += (1L << 32);
             }
+            number[i] -= x.number[i];
         }
-
-        fillFromBinaryRepresentation(result);
     }
 
     /**
@@ -254,6 +236,11 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
+//        BigNum copy = new BigNum(this);
+//        copy.divide(modulus);
+//        copy.multiply(modulus);
+//        subtract(copy);
+
         pool.open();
 
         // we subtract multiples of modulus until we get only the reminder
@@ -629,19 +616,36 @@ public class BigNum {
     }
 
     /**
+     * Returns the number of leading empty blocks in this big integer.
+     *
+     * @return Number of leading empty blocks in this big integer.
+     */
+    private int countLeadingEmptyBlocks() {
+        int emptyBlocks = 0;
+
+        while (emptyBlocks < BLOCKS && number[emptyBlocks] == 0) {
+            ++emptyBlocks;
+        }
+
+        return emptyBlocks;
+    }
+
+    /**
      * Returns the number of leading zeros in this big integer.
      *
      * @return Number of leading zeros in this big integer.
      */
     private int countLeadingZeros() {
-        int counter = 0;
+        // count empty leading blocks
+        int emptyBlocks = countLeadingEmptyBlocks();
+        int counter = BLOCK_SIZE * emptyBlocks;
 
-        byte[] binaryRepresentation = binaryRepresentation();
-        for (byte b : binaryRepresentation) {
-            if (b == 0) {
+        // count leading zeros in the first non-empty block if it exists
+        if (emptyBlocks < BLOCKS) {
+            long mask = (1L << 31);
+            while ((number[emptyBlocks] & mask) == 0) {
+                mask >>= 1;
                 ++counter;
-            } else {
-                return counter;
             }
         }
 
