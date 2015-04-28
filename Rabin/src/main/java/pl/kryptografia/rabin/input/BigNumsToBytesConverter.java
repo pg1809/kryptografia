@@ -18,8 +18,6 @@ public class BigNumsToBytesConverter {
 
     public static int paddedBytes;
 
-    private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-
     /**
      * Converts long value to an array of bytes (1 long = 4 bytes).
      *
