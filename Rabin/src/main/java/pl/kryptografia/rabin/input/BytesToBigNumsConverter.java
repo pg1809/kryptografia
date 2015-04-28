@@ -40,6 +40,7 @@ public class BytesToBigNumsConverter {
     public BytesToBigNumsConverter(byte[] input) {
         int k = input.length;
         int newBytes = BYTES_PER_CHUNK - k % BYTES_PER_CHUNK;
+        BigNumsToBytesConverter.paddedBytes = newBytes;
         if (newBytes == BYTES_PER_CHUNK) {
             newBytes = 0;
         }
@@ -116,8 +117,8 @@ public class BytesToBigNumsConverter {
      * For given big number inserts into the last two block hash of blocks
      * 80-111.
      *
-     * This method assumes that the initial BigNum consists of blocks 80-111
-     * and adds hash of them in last two blocks.
+     * This method assumes that the initial BigNum consists of blocks 80-111 and
+     * adds hash of them in last two blocks.
      *
      * @param input BigNum without hash at last two blocks.
      * @return BigNum with added hash at last two blocks.

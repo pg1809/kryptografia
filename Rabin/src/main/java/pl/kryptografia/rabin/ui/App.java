@@ -1,9 +1,11 @@
 package pl.kryptografia.rabin.ui;
 
+import java.util.Arrays;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
 import pl.kryptografia.rabin.calculation.Pair;
+import pl.kryptografia.rabin.input.BigNumsToBytesConverter;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
 public class App {
@@ -107,7 +109,10 @@ public class App {
         yQ.modulo(publicKey);
 
         BigNum[] decryptedText = new BigNum[cipherText.length];
+        byte[] decryptedChunkBytes;
+        byte[] decryptedBytes = new byte[bytes.length];
         int counter = 0;
+        int bytesCounter = 0;
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);
             squareP.powerModulo(exponentP, p);
@@ -128,7 +133,17 @@ public class App {
             tempQ.modulo(publicKey);
 
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
+
+            boolean lastChunk = false;
+            if (counter - 1 == cipherText.length - 1) {
+                lastChunk = true;
+            }
+            decryptedChunkBytes = BigNumsToBytesConverter.convertChunk(decryptedText[counter - 1], lastChunk);
+            for (int i = 0; i < decryptedChunkBytes.length; i++) {
+                decryptedBytes[bytesCounter++] = decryptedChunkBytes[i];
+            }
         }
+        System.out.println(Arrays.equals(bytes, decryptedBytes));
     }
 
     /**
