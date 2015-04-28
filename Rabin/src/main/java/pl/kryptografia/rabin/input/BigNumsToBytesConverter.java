@@ -5,7 +5,6 @@
  */
 package pl.kryptografia.rabin.input;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import pl.kryptografia.rabin.bignum.BigNum;
