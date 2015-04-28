@@ -13,6 +13,17 @@ public class App {
 
     public static void main(String[] args) {
         
+//        BigNum a = new BigNum();
+//        a.randomize(4);
+//        a.setBit(4096 - 4 * 32 + 1, 1);
+//        System.out.println(a.toPrettyString());
+//        a.shiftLeft(2);
+//        System.out.println(a.toPrettyString());
+//        
+//        if (1 == 1) {
+//            return;
+//        }
+        
         // p and q are factors of the public key
         BigNum p = new BigNum();
         BigNum q = new BigNum();
@@ -163,7 +174,7 @@ public class App {
 
             System.err.println("tempQ = " + tempQ);
             System.err.println("result = " + result.toString(2));
-            
+
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
         }
     }

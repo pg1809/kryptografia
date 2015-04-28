@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.bignum;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -59,6 +60,26 @@ public class BigNum {
      * Pool used for creating temporary big integers.
      */
     private final static BigNumPool pool = BigNumPool.getInstance();
+
+    // beginMask[i] can be used to extract first i bits from long
+    private final static long beginMask[] = new long[BLOCK_SIZE + 1];
+
+    // endMask[i] can be used to extract last i bits from long
+    private final static long endMask[] = new long[BLOCK_SIZE + 1];
+
+    static {
+        long eMask = 0;
+        long bMask = 0;
+        for (int i = 0; i < BLOCK_SIZE + 1; ++i) {
+            beginMask[i] = bMask;
+            endMask[i] = eMask;
+
+            eMask |= (1L << i);
+            bMask |= (1L << (BLOCK_SIZE - i - 1));
+
+//            System.out.println(String.format("%2d : %033d %033d", i, new BigInteger(Long.toBinaryString(beginMask[i])), new BigInteger(Long.toBinaryString(endMask[i]))));
+        }
+    }
 
     /**
      * Creates a big number equal to 0.
@@ -213,8 +234,9 @@ public class BigNum {
      * @param x Value to subtract from this number.
      */
     public void absSubtract(BigNum x) {
+
         // we subtract block by block, starting from the least significant ones
-        for (int i = 0; i < BLOCKS; ++i) {
+        for (int i = BLOCKS - 1; i >= 0; --i) {
             // if our block is lesser than corresponding block from x, we need 
             // to borrow one bit
             if (number[i] < x.number[i]) {
@@ -447,19 +469,44 @@ public class BigNum {
      *
      * @param bias Number of bits by which this number should be shifted.
      */
-    private void shiftLeft(int bias) {
-        byte[] binaryRepresentation = binaryRepresentation();
+    public void shiftLeft(int bias) {
+        // how many whole blocks we shift
+        int shiftBlocks = bias / BLOCK_SIZE;
+        // how many bits remains to shift
+        int innerShift = bias % BLOCK_SIZE;
 
-        for (int i = 0; i < binaryRepresentation.length - bias; ++i) {
-            binaryRepresentation[i] = binaryRepresentation[i + bias];
+        // shiftBlocks lets us now from which two blocks we need to extract bits
+        // innerShift gives us information how many bits to take from each block
+        // last shiftBlocks are filled with zeros
+        // block with number (BLOCKS - shiftBlocks - 1) is partially filled with
+        // zeros
+        // that is why we took such boundaries for the loop below
+        // every other block can be really an effect of the shift
+        for (int i = 0; i < BLOCKS - shiftBlocks - 1; ++i) {
+            number[i] = ((number[i + shiftBlocks] & endMask[BLOCK_SIZE - innerShift]) << innerShift)
+                    | ((number[i + shiftBlocks + 1] & beginMask[innerShift]) >>> (BLOCK_SIZE - innerShift));
         }
 
-        // when we shift left zeros appear on the right
-        for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
-            binaryRepresentation[i] = 0;
+        // block which is partially filled with zeros
+        number[BLOCKS - shiftBlocks - 1] = (number[BLOCKS - 1] & endMask[BLOCK_SIZE - innerShift]) << innerShift;
+
+        // blocks totally filled with zeros
+        for (int i = BLOCKS - shiftBlocks; i < BLOCKS; ++i) {
+            number[i] = 0;
         }
 
-        fillFromBinaryRepresentation(binaryRepresentation);
+//        byte[] binaryRepresentation = binaryRepresentation();
+//
+//        for (int i = 0; i < binaryRepresentation.length - bias; ++i) {
+//            binaryRepresentation[i] = binaryRepresentation[i + bias];
+//        }
+//
+//        // when we shift left zeros appear on the right
+//        for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
+//            binaryRepresentation[i] = 0;
+//        }
+//
+//        fillFromBinaryRepresentation(binaryRepresentation);
     }
 
     /**
@@ -646,7 +693,7 @@ public class BigNum {
         if (emptyBlocks < BLOCKS) {
             long mask = (1L << 31);
             while ((number[emptyBlocks] & mask) == 0) {
-                mask >>= 1;
+                mask >>>= 1;
                 ++counter;
             }
         }
