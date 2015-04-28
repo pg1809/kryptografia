@@ -486,19 +486,6 @@ public class BigNum {
         for (int i = BLOCKS - shiftBlocks; i < BLOCKS; ++i) {
             number[i] = 0;
         }
-
-//        byte[] binaryRepresentation = binaryRepresentation();
-//
-//        for (int i = 0; i < binaryRepresentation.length - bias; ++i) {
-//            binaryRepresentation[i] = binaryRepresentation[i + bias];
-//        }
-//
-//        // when we shift left zeros appear on the right
-//        for (int i = binaryRepresentation.length - bias; i < binaryRepresentation.length; ++i) {
-//            binaryRepresentation[i] = 0;
-//        }
-//
-//        fillFromBinaryRepresentation(binaryRepresentation);
     }
 
     /**
