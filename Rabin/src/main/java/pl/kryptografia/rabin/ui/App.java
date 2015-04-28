@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.ui;
 
+import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
@@ -80,7 +81,7 @@ public class App {
         publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
-        byte[] bytes = new byte[1000];
+        byte[] bytes = new byte[10240];
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
@@ -138,10 +139,10 @@ public class App {
             tempQ.modulo(publicKey);
 
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
-        }
 
-        for (BigNum d : decryptedText) {
-            System.out.println(d.absGreaterThan(BigNum.ZERO));
+            if (decryptedText[counter - 1] == BigNum.ZERO) {
+                System.out.println("BLAD");
+            }
         }
     }
 
@@ -169,6 +170,7 @@ public class App {
         possibleText[2].modulo(publicKey);
 
         possibleText[3] = new BigNum(publicKey);
+        possibleText[3].subtract(possibleText[2]);
 
         for (int i = 0; i < 4; ++i) {
             long hash = BytesToBigNumsConverter.calculateHash(possibleText[i], BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
