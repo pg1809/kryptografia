@@ -9,7 +9,7 @@ public class BytesToBigNumsConverter {
      * Bytes per single block of BigNum.
      */
     private final static int BYTES_PER_BLOCK = BigNum.BLOCK_SIZE / 8;
-    
+
     /**
      * BigNum blocks of hash.
      */
@@ -95,7 +95,7 @@ public class BytesToBigNumsConverter {
 
         return result;
     }
-    
+
     /**
      * Calculates hash of input blocks.
      *
@@ -106,17 +106,19 @@ public class BytesToBigNumsConverter {
     public static long calculateHash(BigNum input, int dataSizeInBlocks) {
         long hashCode = 0;
         int startingDataBlock = BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS);
-        for (int i = 0; i < dataSizeInBlocks; i++) {            
+        for (int i = 0; i < dataSizeInBlocks; i++) {
+            if (input == null) {
+            }
             hashCode = 31 * hashCode + (input.getBlock(startingDataBlock + i) & 0xffffffffL);
         }
-        System.err.println("HC: " + (hashCode * input.getSign()));
         return hashCode * input.getSign();
     }
 
     /**
-     * For given big number inserts into the last two block hash of blocks 80-111.
+     * For given big number inserts into the last two block hash of blocks
+     * 80-111.
      *
-     * This method assumes that the initial BigNum consists of blocks 80-111 
+     * This method assumes that the initial BigNum consists of blocks 80-111
      * and adds hash of them in last two blocks.
      *
      * @param input BigNum without hash at last two blocks.
@@ -126,8 +128,7 @@ public class BytesToBigNumsConverter {
         long hash = calculateHash(input, BLOCKS_PER_CHUNK);
         long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;
         long secondHashBlock = (hash << BigNum.BLOCK_SIZE) >>> BigNum.BLOCK_SIZE;
-        System.err.println("FHB: " + firstHashBlock);
-        System.err.println("SHB: " + secondHashBlock);
+
         input.replaceBlock(BigNum.BLOCKS - 2, firstHashBlock);
         input.replaceBlock(BigNum.BLOCKS - 1, secondHashBlock);
         return input;

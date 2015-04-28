@@ -28,12 +28,11 @@ public class BigNumPool {
 
     public BigNum get() {
         if (next == pool.size()) {
-            System.out.println("Resizing pool to: " + 2 * pool.size());
             for (int i = 0; i < next; ++i) {
                 pool.add(new BigNum());
             }
         }
-        
+
         return pool.get(next++);
     }
 

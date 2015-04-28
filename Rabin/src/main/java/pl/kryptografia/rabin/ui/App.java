@@ -1,6 +1,5 @@
 package pl.kryptografia.rabin.ui;
 
-import java.math.BigInteger;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
@@ -12,7 +11,7 @@ public class App {
     private static final Random generator = new Random();
 
     public static void main(String[] args) {
-        
+
 //        BigNum a = new BigNum();
 //        a.randomize(4);
 //        a.setBit(4096 - 4 * 32 + 1, 1);
@@ -23,7 +22,6 @@ public class App {
 //        if (1 == 1) {
 //            return;
 //        }
-        
         // p and q are factors of the public key
         BigNum p = new BigNum();
         BigNum q = new BigNum();
@@ -82,7 +80,7 @@ public class App {
         publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
-        byte[] bytes = new byte[100];
+        byte[] bytes = new byte[1000];
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
@@ -101,9 +99,6 @@ public class App {
         exponentP.add(BigNum.ONE);
         exponentP.shiftRight(2);
 
-        System.out.println("exponentP: " + exponentP.toPrettyString());
-        System.out.println("p: " + p.toPrettyString());
-
         BigNum exponentQ = new BigNum(q);
         exponentQ.add(BigNum.ONE);
         exponentQ.shiftRight(2);
@@ -115,35 +110,20 @@ public class App {
         BigNum yP = solution.first;
         BigNum yQ = solution.second;
 
-        System.err.println("After euclidean solver");
-
         // we calculate the remainder modulo public key because yP and yQ are
         // used only as a factor in equations calculated modulo public key
         // that way we make sure that all partial result will not overflow
         yP.modulo(publicKey);
         yQ.modulo(publicKey);
 
-        System.err.println("After computing modulos");
-
         BigNum[] decryptedText = new BigNum[cipherText.length];
         int counter = 0;
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);
-//            System.err.println("BEFORE--------------squareP = " + squareP);
             squareP.powerModulo(exponentP, p);
-
-            BigInteger result = new BigInteger(encryptedCharacter.toString(), 2);
-            result = result.modPow(new BigInteger(exponentP.toString(), 2), new BigInteger(p.toString(), 2));
-            System.err.println("AFTER---------------squareP = " + squareP);
-            System.err.println("AFTER---------------result = " + result.toString(2));
 
             BigNum squareQ = new BigNum(encryptedCharacter);
             squareQ.powerModulo(exponentQ, q);
-
-            result = new BigInteger(encryptedCharacter.toString(), 2);
-            result = result.modPow(new BigInteger(exponentQ.toString(), 2), new BigInteger(q.toString(), 2));
-            System.err.println("squareQ = " + squareQ);
-            System.err.println("result = " + result.toString(2));
 
             BigNum tempP = new BigNum(p);
             tempP.multiply(squareQ);
@@ -151,31 +131,17 @@ public class App {
             tempP.multiply(yP);
             tempP.modulo(publicKey);
 
-            result = new BigInteger(p.toString(), 2);
-            result = result.multiply(new BigInteger(squareQ.toString(), 2));
-            result = result.mod(new BigInteger(publicKey.toString(), 2));
-            result = result.multiply(new BigInteger(yP.toString(), 2));
-            result = result.mod(new BigInteger(publicKey.toString(), 2));
-
-            System.err.println("tempP = " + tempP);
-            System.err.println("result = " + result.toString(2));
-
             BigNum tempQ = new BigNum(q);
             tempQ.multiply(squareP);
             tempQ.modulo(publicKey);
             tempQ.multiply(yQ);
             tempQ.modulo(publicKey);
 
-            result = new BigInteger(q.toString(), 2);
-            result = result.multiply(new BigInteger(squareP.toString(), 2));
-            result = result.mod(new BigInteger(publicKey.toString(), 2));
-            result = result.multiply(new BigInteger(yQ.toString(), 2));
-            result = result.mod(new BigInteger(publicKey.toString(), 2));
-
-            System.err.println("tempQ = " + tempQ);
-            System.err.println("result = " + result.toString(2));
-
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
+        }
+
+        for (BigNum d : decryptedText) {
+            System.out.println(d.absGreaterThan(BigNum.ZERO));
         }
     }
 
@@ -195,8 +161,15 @@ public class App {
         possibleText[0].add(tempQ);
         possibleText[0].modulo(publicKey);
 
-//        System.err.println("tempP " + tempP);
-//        System.err.println("tempQ " + tempQ);
+        possibleText[1] = new BigNum(publicKey);
+        possibleText[1].subtract(possibleText[0]);
+
+        possibleText[2] = new BigNum(tempP);
+        possibleText[2].subtract(tempQ);
+        possibleText[2].modulo(publicKey);
+
+        possibleText[3] = new BigNum(publicKey);
+
         for (int i = 0; i < 4; ++i) {
             long hash = BytesToBigNumsConverter.calculateHash(possibleText[i], BytesToBigNumsConverter.BLOCKS_PER_CHUNK);
             long firstHashBlock = hash >>> BigNum.BLOCK_SIZE;

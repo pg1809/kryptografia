@@ -1,6 +1,5 @@
 package pl.kryptografia.rabin.bignum;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -76,8 +75,6 @@ public class BigNum {
 
             eMask |= (1L << i);
             bMask |= (1L << (BLOCK_SIZE - i - 1));
-
-//            System.out.println(String.format("%2d : %033d %033d", i, new BigInteger(Long.toBinaryString(beginMask[i])), new BigInteger(Long.toBinaryString(endMask[i]))));
         }
     }
 
@@ -260,11 +257,6 @@ public class BigNum {
      * @param modulus Modulus.
      */
     public void modulo(BigNum modulus) {
-//        BigNum copy = new BigNum(this);
-//        copy.divide(modulus);
-//        copy.multiply(modulus);
-//        subtract(copy);
-
         pool.open();
 
         // we subtract multiples of modulus until we get only the reminder
