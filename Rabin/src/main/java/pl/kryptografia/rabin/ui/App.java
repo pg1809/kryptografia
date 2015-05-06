@@ -5,6 +5,7 @@ import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
 import pl.kryptografia.rabin.calculation.Pair;
+import pl.kryptografia.rabin.calculation.PrimeSieve;
 import pl.kryptografia.rabin.input.BigNumsToBytesConverter;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
 
