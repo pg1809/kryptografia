@@ -342,17 +342,31 @@ public class BigNum {
 
         BigNum result = new BigNum(BigNum.ONE);
 
+        // factor is squared in each step
+        // however we count how many times we need to multiply it and do the 
+        // multiplication only when needed
+        int factorMultiplications = 0;
+
         // fast modular exponentation is used
         // we multiply the result on 1 bits of the exponent
         for (int i = BITS - 1; i >= 0; --i) {
             if (exponent.getBit(i) == 1) {
+                
+                // perform factor squaring
+                if (factorMultiplications > 0) {
+                    for (int j = 0; j < factorMultiplications; ++j) {
+                        factor.multiply(factor);
+                        factor.modulo(modulus);
+                    }
+
+                    factorMultiplications = 0;
+                }
+
                 result.multiply(factor);
                 result.modulo(modulus);
             }
 
-            // factor is squared in each step
-            factor.multiply(factor);
-            factor.modulo(modulus);
+            ++factorMultiplications;
         }
 
         copyBlockwise(result);
