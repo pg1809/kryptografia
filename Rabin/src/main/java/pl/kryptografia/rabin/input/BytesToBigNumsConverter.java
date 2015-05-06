@@ -18,7 +18,7 @@ public class BytesToBigNumsConverter {
     /**
      * BigNum blocks per one data chunk.
      */
-    public final static int BLOCKS_PER_CHUNK = BigNum.BLOCKS / 4 - HASH_BLOCKS;
+    public final static int BLOCKS_PER_CHUNK = BigNum.BLOCKS / 2 - HASH_BLOCKS;
 
     /**
      * Bytes needed to create one chunk of input data.
