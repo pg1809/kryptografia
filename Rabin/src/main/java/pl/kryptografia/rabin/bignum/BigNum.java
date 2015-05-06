@@ -205,7 +205,7 @@ public class BigNum {
 
     /**
      * Adds to this number a long number starting at given block.
-     * 
+     *
      * @param x Non-negative Long number to add.
      * @param position First block where x should be added.
      */
@@ -213,16 +213,16 @@ public class BigNum {
         // split long number into two 32 bit blocks
         long firstBlock = (x >>> 32);
         long secondBlock = extractLast32Bits(x);
-        
+
         // add least significant block
         number[position + 1] += secondBlock;
         // handle possible overflow
         number[position] += (number[position + 1] >>> 32);
         number[position + 1] = extractLast32Bits(number[position + 1]);
-        
+
         // add most significant block
         number[position] += firstBlock;
-        
+
         // handle overflows as long as they occur
         int current = position;
         while (current > 0 && (number[current] >>> 32) != 0) {
@@ -230,11 +230,11 @@ public class BigNum {
             number[current - 1] += 1;
             // remove overflowing 1 bit from current block
             number[current] = extractLast32Bits(number[current]);
-            
+
             --current;
         }
     }
-    
+
     /**
      * Subtract given big number from this number.
      *
@@ -288,11 +288,11 @@ public class BigNum {
      */
     public void modulo(BigNum modulus) {
         pool.open();
+        BigNum x = pool.get();
 
         // we subtract multiples of modulus until we get only the reminder
         while (absGreaterOrEqualTo(modulus)) {
             // get a copy of modulus
-            BigNum x = pool.get();
             x.initializeFromBigNum(modulus);
 
             // shift modulus left as much as you can
@@ -381,7 +381,7 @@ public class BigNum {
         // we multiply the result on 1 bits of the exponent
         for (int i = BITS - 1; i >= 0; --i) {
             if (exponent.getBit(i) == 1) {
-                
+
                 // perform factor squaring
                 if (factorMultiplications > 0) {
                     for (int j = 0; j < factorMultiplications; ++j) {
