@@ -143,6 +143,7 @@ public class App {
                 decryptedBytes[bytesCounter++] = decryptedChunkBytes[i];
             }
         }
+
         System.out.println(Arrays.equals(bytes, decryptedBytes));
     }
 

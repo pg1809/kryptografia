@@ -262,6 +262,10 @@ public class BigNum {
      */
     public void absSubtract(BigNum x) {
 
+        // the value of the least significant bit borrowed from more significant
+        // block
+        long borrow = (1L << 32);
+
         // we subtract block by block, starting from the least significant ones
         for (int i = BLOCKS - 1; i >= 0; --i) {
             // if our block is lesser than corresponding block from x, we need 
@@ -271,7 +275,7 @@ public class BigNum {
                 --number[i - 1];
                 // for us it is worth 2^33 because it is taken from more 
                 // significant block
-                number[i] += (1L << 32);
+                number[i] += borrow;
             }
             // now we are sure that our block is greater then corresponding 
             // block in x
@@ -487,6 +491,7 @@ public class BigNum {
 
         // in the most significant bit is 1 we cannot shift left anymore
         if (xCopy.getBit(0) == 1) {
+
             return shift;
         }
 
