@@ -72,7 +72,7 @@ public class App {
         publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
-        byte[] bytes = new byte[1024];
+        byte[] bytes = new byte[2048];
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);

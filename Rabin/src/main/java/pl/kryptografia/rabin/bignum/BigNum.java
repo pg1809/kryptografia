@@ -137,9 +137,7 @@ public class BigNum {
                 int position = i + j - BLOCKS;
 
                 // add the result of this multiplication to the global result
-                BigNum y = pool.get();
-                y.initializeFromLong(product, position);
-                result.add(y);
+                result.addLongOnPosition(product, position);
             }
         }
 
@@ -205,6 +203,38 @@ public class BigNum {
         }
     }
 
+    /**
+     * Adds to this number a long number starting at given block.
+     * 
+     * @param x Non-negative Long number to add.
+     * @param position First block where x should be added.
+     */
+    private void addLongOnPosition(long x, int position) {
+        // split long number into two 32 bit blocks
+        long firstBlock = (x >>> 32);
+        long secondBlock = extractLast32Bits(x);
+        
+        // add least significant block
+        number[position + 1] += secondBlock;
+        // handle possible overflow
+        number[position] += (number[position + 1] >>> 32);
+        number[position + 1] = extractLast32Bits(number[position + 1]);
+        
+        // add most significant block
+        number[position] += firstBlock;
+        
+        // handle overflows as long as they occur
+        int current = position;
+        while (current > 0 && (number[current] >>> 32) != 0) {
+            // move overflowing 1 bit to more significant block
+            number[current - 1] += 1;
+            // remove overflowing 1 bit from current block
+            number[current] = extractLast32Bits(number[current]);
+            
+            --current;
+        }
+    }
+    
     /**
      * Subtract given big number from this number.
      *
@@ -548,7 +578,7 @@ public class BigNum {
      */
     private void copyBlockwise(BigNum pattern) {
         for (int i = 0; i < BLOCKS; ++i) {
-            number[i] = pattern.getBlock(i);
+            number[i] = pattern.number[i];
         }
     }
 
