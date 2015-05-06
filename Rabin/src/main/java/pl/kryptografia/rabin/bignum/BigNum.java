@@ -465,7 +465,7 @@ public class BigNum {
      * @return Maximum shift (or -1 if x is greater than this number).
      */
     private int findMaximumLeftShift(BigNum x) {
-
+        
         // if x is already greater than this number return -1
         int shift = -1;
 
@@ -476,7 +476,9 @@ public class BigNum {
         shift = 0;
 
         // create a copy of x not to shift the original
-        BigNum xCopy = new BigNum(x);
+        pool.open();
+        BigNum xCopy = pool.get();
+        xCopy.initializeFromBigNum(x);
 
         // count leading zeros to make the initial shift
         int myLeadingZeros = countLeadingZeros();
@@ -491,7 +493,7 @@ public class BigNum {
 
         // in the most significant bit is 1 we cannot shift left anymore
         if (xCopy.getBit(0) == 1) {
-
+            pool.close();
             return shift;
         }
 
@@ -502,6 +504,7 @@ public class BigNum {
             ++shift;
         }
 
+        pool.close();
         return shift;
     }
 
