@@ -37,7 +37,7 @@ public class EuclideanSolver {
 
         // quotient
         BigNum x;
-        // reminder
+        // remainder
         BigNum r;
 
         do {
