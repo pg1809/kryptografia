@@ -72,12 +72,12 @@ public class App {
         publicKey.multiply(q);
 
         // Generate random input and split it into BigNum chunks
-        byte[] bytes = new byte[2048];
+        byte[] bytes = new byte[1024];
         generator.nextBytes(bytes);
 
         BytesToBigNumsConverter converter = new BytesToBigNumsConverter(bytes);
         BigNum[] plainText = converter.convert();
-
+        
         // Encrypt plain text
         BigNum[] cipherText = new BigNum[plainText.length];
         for (int i = 0; i < plainText.length; ++i) {

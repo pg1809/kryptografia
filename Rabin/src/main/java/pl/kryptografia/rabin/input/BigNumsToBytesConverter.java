@@ -39,18 +39,30 @@ public class BigNumsToBytesConverter {
         List<Byte> listBytes = new ArrayList<>();
         byte[] oneBlockBytes;
         int chunkBlocksWithHash = BytesToBigNumsConverter.BLOCKS_PER_CHUNK + BytesToBigNumsConverter.HASH_BLOCKS;
+        // whole chunk blocks padded with zeros (only possible in last chunk)
         int actualPaddedBlocks = 0;
+        // padded bytes in last data block (only possible in last chunk)
+        int actualPaddedBytes = 0;
+
         if (lastChunk) {
-            actualPaddedBlocks = paddedBytes * 8 / BigNum.BLOCK_SIZE;
+            actualPaddedBlocks = paddedBytes / BytesToBigNumsConverter.BYTES_PER_BLOCK;
+            actualPaddedBytes = paddedBytes % BytesToBigNumsConverter.BYTES_PER_BLOCK;
         }
-        
+
         for (int i = BigNum.BLOCKS - chunkBlocksWithHash; i < BigNum.BLOCKS - BytesToBigNumsConverter.HASH_BLOCKS - actualPaddedBlocks; i++) {
             oneBlockBytes = longToBytes(input.getBlock(i));
-            for (byte oneByte : oneBlockBytes) {
-                listBytes.add(oneByte);
+            // data bytes without padded zeros
+            int notPaddedDataBytesInBlock = oneBlockBytes.length;
+
+            if (lastChunk && i == BigNum.BLOCKS - BytesToBigNumsConverter.HASH_BLOCKS - actualPaddedBlocks - 1) {
+                notPaddedDataBytesInBlock = oneBlockBytes.length - actualPaddedBytes;
+            }
+
+            for (int j = 0; j < notPaddedDataBytesInBlock; j++) {
+                listBytes.add(oneBlockBytes[j]);
             }
         }
-        
+
         byte[] bytes = new byte[listBytes.size()];
         for (int i = 0; i < listBytes.size(); i++) {
             bytes[i] = listBytes.get(i);

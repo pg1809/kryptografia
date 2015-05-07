@@ -8,7 +8,7 @@ public class BytesToBigNumsConverter {
     /**
      * Bytes per single block of BigNum.
      */
-    private final static int BYTES_PER_BLOCK = BigNum.BLOCK_SIZE / 8;
+    public final static int BYTES_PER_BLOCK = BigNum.BLOCK_SIZE / 8;
 
     /**
      * BigNum blocks of hash.
@@ -40,10 +40,14 @@ public class BytesToBigNumsConverter {
     public BytesToBigNumsConverter(byte[] input) {
         int k = input.length;
         int newBytes = BYTES_PER_CHUNK - k % BYTES_PER_CHUNK;
-        BigNumsToBytesConverter.paddedBytes = newBytes;
+//        System.out.println(BYTES_PER_CHUNK);
+//        System.out.println(k);
+//        System.out.println(newBytes);
+        
         if (newBytes == BYTES_PER_CHUNK) {
             newBytes = 0;
         }
+        BigNumsToBytesConverter.paddedBytes = newBytes;
 
         bytes = new byte[k + newBytes];
         for (int i = 0; i < k; ++i) {
