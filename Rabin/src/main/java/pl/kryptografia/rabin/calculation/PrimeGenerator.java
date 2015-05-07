@@ -30,7 +30,7 @@ public class PrimeGenerator {
         four.setBit(BigNum.BITS - 3, 1);
 
         // subtract 4 until you find a prime number
-        while (!isPrime(a)) {
+        while (!isPrime(a, MILLER_RABIN_CONSTANT)) {
             a.subtract(four);
         }
 
@@ -47,13 +47,15 @@ public class PrimeGenerator {
      * x.randomize(BigNum.BLOCKS / 4);
      * </code>
      *
-     * There is a chance of at most 4^(-MILLER_RABIN_CONSTANT) that a complex
+     * There is a chance of at most 4^(-accuracy) that a complex
      * number is considered prime.
      *
      * @param x Big odd number to test.
+     * @param accuracy Determines the chance of test to say that a complex
+     * number is prime.
      * @return True if given number is probably prime.
      */
-    private boolean isPrime(BigNum x) {
+    public boolean isPrime(BigNum x, int accuracy) {
         // one is not a prime number and test does not work for it
         if (x.equals(BigNum.ONE)) {
             return false;
@@ -71,7 +73,7 @@ public class PrimeGenerator {
             d.shiftRight(1);
             ++s;
         }
-        
+
         // we get random numbers by randomizing some blocks (half of the blocks
         // - see method description)
         // however x can have leading zeros so we count it not to put ones 
@@ -81,7 +83,7 @@ public class PrimeGenerator {
             ++xZeroBits;
         }
 
-        for (int iteration = 0; iteration < MILLER_RABIN_CONSTANT; ++iteration) {
+        for (int iteration = 0; iteration < accuracy; ++iteration) {
             // get random a from the range [1, x - 1]
             BigNum a = new BigNum();
             do {

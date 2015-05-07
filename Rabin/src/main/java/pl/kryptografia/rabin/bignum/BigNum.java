@@ -106,6 +106,10 @@ public class BigNum {
         initializeFromBigNum(pattern);
     }
 
+    public BigNum(int initialValue) {
+        initializeFromInt(initialValue);
+    }
+
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
@@ -317,6 +321,39 @@ public class BigNum {
 
         pool.close();
     }
+    
+    public boolean isDivisible(BigNum divisor) {
+        pool.open();
+        // copy of this number not to modify the original
+        BigNum thisCopy = pool.get();
+        thisCopy.initializeFromBigNum(this);
+        // preallocated number for a copy of divisor
+        BigNum x = pool.get();
+
+        // we subtract multiples of divisor until we get only the reminder
+        while (thisCopy.absGreaterOrEqualTo(divisor)) {
+            // get a copy of divisor
+            x.initializeFromBigNum(divisor);
+
+            // shift divisor left as much as you can
+            // this operation is equivalent to finding divisor * 2^k with the
+            // greatest k possible
+            int shift = thisCopy.findMaximumLeftShift(x);
+            x.shiftLeft(shift);
+
+            // x is now some multiple of divisor so we can subtract it
+            thisCopy.absSubtract(x);
+        }
+
+        // if the number somehow became zero with minus sign, we need to adjust
+        // the sign to perform equals method
+        sign = 1;
+        boolean result = thisCopy.equals(BigNum.ZERO);
+        
+        pool.close();
+        
+        return result;
+    }
 
     /**
      * Divides this number by given number and gives up the remainder.
@@ -465,7 +502,7 @@ public class BigNum {
      * @return Maximum shift (or -1 if x is greater than this number).
      */
     private int findMaximumLeftShift(BigNum x) {
-        
+
         // if x is already greater than this number return -1
         int shift = -1;
 
@@ -601,6 +638,17 @@ public class BigNum {
         copyBlockwise(BigNum.ZERO);
         number[firstBlock + 1] = extractLast32Bits(initialValue);
         number[firstBlock] = (initialValue >>> 32);
+    }
+
+    /**
+     * Puts given positive integer into last block of this big number.
+     *
+     * @param initialValue Positive initial value of the least significant
+     * block.
+     */
+    private void initializeFromInt(int initialValue) {
+        copyBlockwise(BigNum.ZERO);
+        number[BLOCKS - 1] = initialValue;
     }
 
     /**

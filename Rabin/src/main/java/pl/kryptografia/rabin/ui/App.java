@@ -1,10 +1,12 @@
 package pl.kryptografia.rabin.ui;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 import pl.kryptografia.rabin.bignum.BigNum;
 import pl.kryptografia.rabin.calculation.EuclideanSolver;
 import pl.kryptografia.rabin.calculation.Pair;
+import pl.kryptografia.rabin.calculation.PrimeGenerator;
 import pl.kryptografia.rabin.calculation.PrimeSieve;
 import pl.kryptografia.rabin.input.BigNumsToBytesConverter;
 import pl.kryptografia.rabin.input.BytesToBigNumsConverter;
@@ -14,6 +16,66 @@ public class App {
     private static final Random generator = new Random();
 
     public static void main(String[] args) {
+
+        int[] primes = PrimeSieve.getInstance().generateOddPrimes();
+
+        BigNum minimum = new BigNum();
+        minimum.randomize(BigNum.BLOCKS / 4);
+        minimum.setBit(BigNum.BITS - 2, 1);
+        minimum.setBit(BigNum.BITS - 1, 1);
+
+//        int range = 100;
+//        BigNum[] bignums = new BigNum[range];
+//        
+//        for (int i = 0; i < range; ++i) {
+//            BigNum boxedI = new BigNum(4 * i);
+//            BigNum copy = new BigNum(minimum);
+//            copy.add(boxedI);
+//            bignums[i] = copy;
+//        }
+//        
+//        List<BigNum> primeCandidates = PrimeSieve.getInstance().sieveOutComplexNumbers(primes, bignums);
+//        System.out.println(primeCandidates.size());
+//        
+//        for (BigNum b : primeCandidates) {
+//            System.out.println(PrimeGenerator.getInstance().isPrime(b, 20));
+//        }
+        PrimeGenerator primeGenerator = PrimeGenerator.getInstance();
+        PrimeSieve primeSieve = PrimeSieve.getInstance();
+
+        int[] smallPrimes = primeSieve.generateOddPrimes();
+
+        BigNum[] candidates = new BigNum[2];
+
+        int probablePrimes = 0;
+        int increase = 0;
+        while (probablePrimes < 2) {
+            System.out.println(increase / 4);
+
+            BigNum toAdd = new BigNum(increase);
+            toAdd.setSign(-1);
+            toAdd.add(minimum);
+
+            if (!primeSieve.sieveOutComplexNumbers(smallPrimes, new BigNum[]{toAdd}).isEmpty()) {
+                if (primeGenerator.isPrime(toAdd, 15)) {
+                    if (primeGenerator.isPrime(toAdd, 5)) {
+                        candidates[probablePrimes] = toAdd;
+                        System.out.println("-------------------------------------");
+                        ++probablePrimes;
+                    }
+                }
+            }
+
+            increase += 4;
+        }
+
+        BigInteger A = new BigInteger(candidates[0].toString(), 2);
+        BigInteger B = new BigInteger(candidates[1].toString(), 2);
+
+        System.out.println(A.isProbablePrime(40));
+        System.out.println(B.isProbablePrime(40));
+
+        System.exit(0);
 
         // p and q are factors of the public key
         BigNum p = new BigNum();
