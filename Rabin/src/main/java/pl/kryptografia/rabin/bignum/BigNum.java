@@ -640,7 +640,7 @@ public class BigNum {
      * @param initialValue Positive initial value of the least significant
      * block.
      */
-    private void initializeFromInt(int initialValue) {
+    public void initializeFromInt(int initialValue) {
         copyBlockwise(BigNum.ZERO);
         number[BLOCKS - 1] = initialValue;
     }
