@@ -17,7 +17,7 @@ public class PrimeSieve {
      */
     private final int MAX_GENERATED_PRIME = 200000;
 
-    private final int SIEVE_SIZE = 2000;
+    private final int SIEVE_SIZE = 1000;
 
     private final int ACCURACY = 15;
 

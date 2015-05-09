@@ -20,7 +20,7 @@ public class App {
 //        initialCandidate.randomize(BigNum.BLOCKS / 4);
 //        initialCandidate.setBit(BigNum.BITS - 2, 1);
 //        initialCandidate.setBit(BigNum.BITS - 1, 1);
-//        
+//
 //        PrimeSieve sieve = PrimeSieve.getInstance();
 //        Pair privateKey = sieve.generateTwoPrimes(initialCandidate);
 //
@@ -29,10 +29,11 @@ public class App {
 //
 //        System.out.println(A.isProbablePrime(40));
 //        System.out.println(B.isProbablePrime(40));
-
-        // p and q are factors of the public key
+//
 //        BigNum p = privateKey.first;
 //        BigNum q = privateKey.second;
+//        
+//        System.exit(0);
 
         BigNum p = new BigNum();
         BigNum q = new BigNum();
@@ -52,7 +53,7 @@ public class App {
                 q.setBit(3 * 1024 + i, 1);
             }
         }
-
+        
         // the public key is a product of p and q
         BigNum publicKey = new BigNum(p);
         publicKey.multiply(q);

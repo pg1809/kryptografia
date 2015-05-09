@@ -508,62 +508,35 @@ public class BigNum {
             return -1;
         }
 
-        int shift = 0;
-
-        // create a copy of x not to shift the original
-        pool.open();
-        BigNum xCopy = pool.get();
-        xCopy.initializeFromBigNum(x);
-
-        // count leading zeros to make the initial shift
+        // count leading zeros to determine where we should start testing bits
         int myLeadingZeros = countLeadingZeros();
-        int xLeadingZeros = xCopy.countLeadingZeros();
-
-        // if this condition is true we can safely shift x and still be sure
-        // that it is less than this number
-        if (xLeadingZeros > myLeadingZeros + 1) {
-            shift = xLeadingZeros - myLeadingZeros - 1;
-            xCopy.shiftLeft(shift);
-        } else if (xLeadingZeros == myLeadingZeros) {
-            // we cannot shift left when given number has the most significant 
-            // one on the same position as this
-            pool.close();
-            return 0;
-        }
-
-        // check if we could make one more shift
+        int xLeadingZeros = x.countLeadingZeros();
+        
+        // difference in leading zeros, for sure non negative because this >= x
+        int diff = xLeadingZeros - myLeadingZeros;
         
         // the first bit to be checked in this number
         int current = myLeadingZeros;
         
-        // in given number we always check a bit which is less significant so we
-        // need to decrease loop boundary by 1
-        while (current < BigNum.BITS - 1) {
+        // test consecutive bits until we find the difference
+        while (current < BigNum.BITS - diff) {
             byte thisBit = getBit(current);
-            byte xBit = xCopy.getBit(current + 1);
+            byte xBit = x.getBit(current + diff);
             
             if (thisBit > xBit) {
-                pool.close();
-                return shift + 1;
+                return diff;
             } else if (thisBit < xBit) {
-                pool.close();
-                return shift;
+                return diff - 1;
             }
             
             ++current;
         }
         
-        // if all bits are the same we can perform one shift more
-        pool.close();
-        return shift + 1;
-        
-//        xCopy.shiftLeft(1);
-//
-//        if (absGreaterOrEqualTo(xCopy)) {
-//            ++shift;
-//        }
+        // if all bits are the same we still satisfy 'is greater or equal'
+        // condition
+        return diff;
     }
-
+    
     /**
      * Shifts this number left by given number of bits.
      *
