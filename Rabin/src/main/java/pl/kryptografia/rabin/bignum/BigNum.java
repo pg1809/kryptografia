@@ -272,18 +272,20 @@ public class BigNum {
 
         // we subtract block by block, starting from the least significant ones
         for (int i = BLOCKS - 1; i >= 0; --i) {
-            // if our block is lesser than corresponding block from x, we need 
-            // to borrow one bit
-            if (number[i] < x.number[i]) {
-                // least significant bit in the previous block is worth 1
-                --number[i - 1];
-                // for us it is worth 2^33 because it is taken from more 
-                // significant block
-                number[i] += borrow;
+            if (x.number[i] != 0) {
+                // if our block is lesser than corresponding block from x, we need 
+                // to borrow one bit
+                if (number[i] < x.number[i]) {
+                    // least significant bit in the previous block is worth 1
+                    --number[i - 1];
+                    // for us it is worth 2^33 because it is taken from more 
+                    // significant block
+                    number[i] += borrow;
+                }
+                // now we are sure that our block is greater then corresponding 
+                // block in x
+                number[i] -= x.number[i];
             }
-            // now we are sure that our block is greater then corresponding 
-            // block in x
-            number[i] -= x.number[i];
         }
     }
 
@@ -321,7 +323,7 @@ public class BigNum {
 
         pool.close();
     }
-    
+
     public boolean isDivisible(BigNum divisor) {
         pool.open();
         // copy of this number not to modify the original
@@ -349,9 +351,9 @@ public class BigNum {
         // the sign to perform equals method
         sign = 1;
         boolean result = thisCopy.equals(BigNum.ZERO);
-        
+
         pool.close();
-        
+
         return result;
     }
 
@@ -511,32 +513,32 @@ public class BigNum {
         // count leading zeros to determine where we should start testing bits
         int myLeadingZeros = countLeadingZeros();
         int xLeadingZeros = x.countLeadingZeros();
-        
+
         // difference in leading zeros, for sure non negative because this >= x
         int diff = xLeadingZeros - myLeadingZeros;
-        
+
         // the first bit to be checked in this number
         int current = myLeadingZeros;
-        
+
         // test consecutive bits until we find the difference
         while (current < BigNum.BITS - diff) {
             byte thisBit = getBit(current);
             byte xBit = x.getBit(current + diff);
-            
+
             if (thisBit > xBit) {
                 return diff;
             } else if (thisBit < xBit) {
                 return diff - 1;
             }
-            
+
             ++current;
         }
-        
+
         // if all bits are the same we still satisfy 'is greater or equal'
         // condition
         return diff;
     }
-    
+
     /**
      * Shifts this number left by given number of bits.
      *
