@@ -106,6 +106,10 @@ public class BigNum {
         initializeFromBigNum(pattern);
     }
 
+    public BigNum(int initialValue) {
+        initializeFromInt(initialValue);
+    }
+
     /**
      * Multiplies two big numbers with half a maximum least significant bits.
      *
@@ -268,18 +272,20 @@ public class BigNum {
 
         // we subtract block by block, starting from the least significant ones
         for (int i = BLOCKS - 1; i >= 0; --i) {
-            // if our block is lesser than corresponding block from x, we need 
-            // to borrow one bit
-            if (number[i] < x.number[i]) {
-                // least significant bit in the previous block is worth 1
-                --number[i - 1];
-                // for us it is worth 2^33 because it is taken from more 
-                // significant block
-                number[i] += borrow;
+            if (x.number[i] != 0) {
+                // if our block is lesser than corresponding block from x, we need 
+                // to borrow one bit
+                if (number[i] < x.number[i]) {
+                    // least significant bit in the previous block is worth 1
+                    --number[i - 1];
+                    // for us it is worth 2^33 because it is taken from more 
+                    // significant block
+                    number[i] += borrow;
+                }
+                // now we are sure that our block is greater then corresponding 
+                // block in x
+                number[i] -= x.number[i];
             }
-            // now we are sure that our block is greater then corresponding 
-            // block in x
-            number[i] -= x.number[i];
         }
     }
 
@@ -316,6 +322,39 @@ public class BigNum {
         }
 
         pool.close();
+    }
+
+    public boolean isDivisible(BigNum divisor) {
+        pool.open();
+        // copy of this number not to modify the original
+        BigNum thisCopy = pool.get();
+        thisCopy.initializeFromBigNum(this);
+        // preallocated number for a copy of divisor
+        BigNum x = pool.get();
+
+        // we subtract multiples of divisor until we get only the reminder
+        while (thisCopy.absGreaterOrEqualTo(divisor)) {
+            // get a copy of divisor
+            x.initializeFromBigNum(divisor);
+
+            // shift divisor left as much as you can
+            // this operation is equivalent to finding divisor * 2^k with the
+            // greatest k possible
+            int shift = thisCopy.findMaximumLeftShift(x);
+            x.shiftLeft(shift);
+
+            // x is now some multiple of divisor so we can subtract it
+            thisCopy.absSubtract(x);
+        }
+
+        // if the number somehow became zero with minus sign, we need to adjust
+        // the sign to perform equals method
+        sign = 1;
+        boolean result = thisCopy.equals(BigNum.ZERO);
+
+        pool.close();
+
+        return result;
     }
 
     /**
@@ -465,47 +504,39 @@ public class BigNum {
      * @return Maximum shift (or -1 if x is greater than this number).
      */
     private int findMaximumLeftShift(BigNum x) {
-        
+
         // if x is already greater than this number return -1
-        int shift = -1;
-
         if (!absGreaterOrEqualTo(x)) {
-            return shift;
+            return -1;
         }
 
-        shift = 0;
-
-        // create a copy of x not to shift the original
-        pool.open();
-        BigNum xCopy = pool.get();
-        xCopy.initializeFromBigNum(x);
-
-        // count leading zeros to make the initial shift
+        // count leading zeros to determine where we should start testing bits
         int myLeadingZeros = countLeadingZeros();
-        int xLeadingZeros = xCopy.countLeadingZeros();
+        int xLeadingZeros = x.countLeadingZeros();
 
-        // if this condition is true we can safely shift x and still be sure
-        // that it is less than this number
-        if (xLeadingZeros > myLeadingZeros + 1) {
-            shift = xLeadingZeros - myLeadingZeros - 1;
-            xCopy.shiftLeft(shift);
+        // difference in leading zeros, for sure non negative because this >= x
+        int diff = xLeadingZeros - myLeadingZeros;
+
+        // the first bit to be checked in this number
+        int current = myLeadingZeros;
+
+        // test consecutive bits until we find the difference
+        while (current < BigNum.BITS - diff) {
+            byte thisBit = getBit(current);
+            byte xBit = x.getBit(current + diff);
+
+            if (thisBit > xBit) {
+                return diff;
+            } else if (thisBit < xBit) {
+                return diff - 1;
+            }
+
+            ++current;
         }
 
-        // in the most significant bit is 1 we cannot shift left anymore
-        if (xCopy.getBit(0) == 1) {
-            pool.close();
-            return shift;
-        }
-
-        // check if we can make one more shift
-        xCopy.shiftLeft(1);
-
-        if (absGreaterOrEqualTo(xCopy)) {
-            ++shift;
-        }
-
-        pool.close();
-        return shift;
+        // if all bits are the same we still satisfy 'is greater or equal'
+        // condition
+        return diff;
     }
 
     /**
@@ -601,6 +632,17 @@ public class BigNum {
         copyBlockwise(BigNum.ZERO);
         number[firstBlock + 1] = extractLast32Bits(initialValue);
         number[firstBlock] = (initialValue >>> 32);
+    }
+
+    /**
+     * Puts given positive integer into last block of this big number.
+     *
+     * @param initialValue Positive initial value of the least significant
+     * block.
+     */
+    public void initializeFromInt(int initialValue) {
+        copyBlockwise(BigNum.ZERO);
+        number[BLOCKS - 1] = initialValue;
     }
 
     /**

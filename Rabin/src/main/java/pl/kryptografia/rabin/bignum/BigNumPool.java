@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class BigNumPool {
 
-    private final static int INITIAL_POOL_SIZE = 1200;
+    private final static int INITIAL_POOL_SIZE = 50000;
 
     private final List<Integer> spacePointers = new ArrayList<>();
 
