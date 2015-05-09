@@ -504,13 +504,11 @@ public class BigNum {
     private int findMaximumLeftShift(BigNum x) {
 
         // if x is already greater than this number return -1
-        int shift = -1;
-
         if (!absGreaterOrEqualTo(x)) {
-            return shift;
+            return -1;
         }
 
-        shift = 0;
+        int shift = 0;
 
         // create a copy of x not to shift the original
         pool.open();
@@ -526,23 +524,44 @@ public class BigNum {
         if (xLeadingZeros > myLeadingZeros + 1) {
             shift = xLeadingZeros - myLeadingZeros - 1;
             xCopy.shiftLeft(shift);
-        }
-
-        // in the most significant bit is 1 we cannot shift left anymore
-        if (xCopy.getBit(0) == 1) {
+        } else if (xLeadingZeros == myLeadingZeros) {
+            // we cannot shift left when given number has the most significant 
+            // one on the same position as this
             pool.close();
-            return shift;
+            return 0;
         }
 
-        // check if we can make one more shift
-        xCopy.shiftLeft(1);
-
-        if (absGreaterOrEqualTo(xCopy)) {
-            ++shift;
+        // check if we could make one more shift
+        
+        // the first bit to be checked in this number
+        int current = myLeadingZeros;
+        
+        // in given number we always check a bit which is less significant so we
+        // need to decrease loop boundary by 1
+        while (current < BigNum.BITS - 1) {
+            byte thisBit = getBit(current);
+            byte xBit = xCopy.getBit(current + 1);
+            
+            if (thisBit > xBit) {
+                pool.close();
+                return shift + 1;
+            } else if (thisBit < xBit) {
+                pool.close();
+                return shift;
+            }
+            
+            ++current;
         }
-
+        
+        // if all bits are the same we can perform one shift more
         pool.close();
-        return shift;
+        return shift + 1;
+        
+//        xCopy.shiftLeft(1);
+//
+//        if (absGreaterOrEqualTo(xCopy)) {
+//            ++shift;
+//        }
     }
 
     /**
