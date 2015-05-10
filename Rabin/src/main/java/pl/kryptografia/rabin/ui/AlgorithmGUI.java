@@ -47,7 +47,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }
 
     private void initKey() {
-        KeyDialog keyDialog = new KeyDialog(this, true);
+        KeyDialog keyDialog = new KeyDialog(this, false);
         keyDialog.setVisible(true);
         BigNum initialCandidate = new BigNum();
         initialCandidate.randomize(BigNum.BLOCKS / 4);
