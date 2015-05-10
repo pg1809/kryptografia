@@ -260,8 +260,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         byte[] bytesToEncrypt = jTextAreaInputText.getText().getBytes();
         byte[] encryptedBytes = cipher(bytesToEncrypt);
         
-        System.out.println(Arrays.toString(encryptedBytes));
-        
         jTextAreaOutputText.setText(new String(encryptedBytes));
         jTextAreaOutputText.setInternalBuffer(encryptedBytes);
     }//GEN-LAST:event_jButtonEncryptTextActionPerformed

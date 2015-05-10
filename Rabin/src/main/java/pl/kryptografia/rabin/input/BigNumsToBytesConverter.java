@@ -18,7 +18,7 @@ public class BigNumsToBytesConverter {
         List<byte[]> fragments = new ArrayList<>(num.length);
         
         for (int i = 0; i < num.length; ++i) {
-            for (int j = BigNum.BLOCKS - BytesToBigNumsConverter.BLOCKS_PER_CHUNK - BytesToBigNumsConverter.HASH_BLOCKS; j < BigNum.BLOCKS; ++j) {
+            for (int j = BigNum.BLOCKS / 2; j < BigNum.BLOCKS; ++j) {
                 fragments.add(longToBytes(num[i].getBlock(j)));
             }
         }

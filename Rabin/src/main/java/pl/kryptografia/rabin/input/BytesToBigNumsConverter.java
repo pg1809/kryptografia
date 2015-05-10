@@ -41,9 +41,6 @@ public class BytesToBigNumsConverter {
     public BytesToBigNumsConverter(byte[] input) {
         int k = input.length;
         int newBytes = BYTES_PER_CHUNK - k % BYTES_PER_CHUNK;
-//        System.out.println(BYTES_PER_CHUNK);
-//        System.out.println(k);
-//        System.out.println(newBytes);
 
         if (newBytes == BYTES_PER_CHUNK) {
             newBytes = 0;
@@ -139,8 +136,8 @@ public class BytesToBigNumsConverter {
     }
 
     public static BigNum[] convertCipherTextToBigNum(byte[] cipherText) {
-        int hashedChunkSize = (BLOCKS_PER_CHUNK + HASH_BLOCKS) * 4;
-        int numberOfChunks = cipherText.length / hashedChunkSize;
+        int cipherTextCharSize = BigNum.BLOCKS * 2;
+        int numberOfChunks = cipherText.length / cipherTextCharSize;
 
         BigNum[] converted = new BigNum[numberOfChunks];
 
@@ -148,9 +145,9 @@ public class BytesToBigNumsConverter {
 
             BigNum result = new BigNum();
 
-            int currentByte = index * hashedChunkSize;
+            int currentByte = index * cipherTextCharSize;
 
-            for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS; ++i) {
+            for (int i = BigNum.BLOCKS / 2; i < BigNum.BLOCKS; ++i) {
                 long block = 0;
                 for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                     // 0xFF sorcery lets us treat this byte as really unsigned
