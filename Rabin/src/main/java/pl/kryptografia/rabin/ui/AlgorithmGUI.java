@@ -353,6 +353,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         byte[] decryptedBytes = new byte[plainTextBytesLength];
         int counter = 0;
         int bytesCounter = 0;
+        
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);
             squareP.powerModulo(exponentP, p);
@@ -373,6 +374,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             tempQ.modulo(publicKey);
 
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
+            System.out.println(decryptedText[counter - 1].toPrettyString());
 
             boolean lastChunk = false;
             if (counter - 1 == cipherText.length - 1) {
@@ -416,7 +418,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 return possibleText[i];
             }
         }
-
+        
         return BigNum.ZERO;
     }
 

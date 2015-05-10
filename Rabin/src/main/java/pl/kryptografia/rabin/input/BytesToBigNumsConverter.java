@@ -138,7 +138,9 @@ public class BytesToBigNumsConverter {
     }
 
     public static BigNum[] convertCipherTextToBigNum(byte[] cipherText) {
-        int hashedChunkSize = (BLOCKS_PER_CHUNK + HASH_BLOCKS) * 8;
+        System.out.println(cipherText.length);
+        
+        int hashedChunkSize = (BLOCKS_PER_CHUNK + HASH_BLOCKS) * 4;
         int numberOfChunks = cipherText.length / hashedChunkSize;
 
         BigNum[] converted = new BigNum[numberOfChunks];
