@@ -32,9 +32,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private BigNum publicKey;
 
     private BytesToBigNumsConverter converter;
-    
+
     private int plainTextBytesLength;
-    
+
     /**
      * Creates new form AlgorithmGUI
      */
@@ -47,25 +47,44 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }
 
     private void initKey() {
-        KeyDialog keyDialog = new KeyDialog(this, false);
-        keyDialog.setVisible(true);
-        BigNum initialCandidate = new BigNum();
-        initialCandidate.randomize(BigNum.BLOCKS / 4);
-        initialCandidate.setBit(BigNum.BITS - 2, 1);
-        initialCandidate.setBit(BigNum.BITS - 1, 1);
+//        KeyDialog keyDialog = new KeyDialog(this, false);
+//        keyDialog.setVisible(true);
+//        BigNum initialCandidate = new BigNum();
+//        initialCandidate.randomize(BigNum.BLOCKS / 4);
+//        initialCandidate.setBit(BigNum.BITS - 2, 1);
+//        initialCandidate.setBit(BigNum.BITS - 1, 1);
+//
+//        PrimeSieve sieve = PrimeSieve.getInstance();
+//        Pair privateKey = sieve.generateTwoPrimes(initialCandidate);
+//
+//        p = privateKey.first;
+//        q = privateKey.second;
 
-        PrimeSieve sieve = PrimeSieve.getInstance();
-        Pair privateKey = sieve.generateTwoPrimes(initialCandidate);
+        p = new BigNum();
+        q = new BigNum();
 
-        p = privateKey.first;
-        q = privateKey.second;
+        String pPattern = "1100001110100010010100101101011101001100100101001011100010001011111111101111111100110101110010011110101111001101101000100010101010000011111011010110101011011101010011001001011010101101001011110000101011010011001001011101011111010001000001100100111111001010001010011001011110101000011001000011000111010000101001110000100010100010010101111001011001110011000011010111111010010111010111110100001100000100111010010110001111111001000100011010110010000110111001111011101000000110100110101101101111100101110100101000100001011010011110100100100000100001110011110100101101111001010110100010101001101011010000100001010011101111111100010100100001001100101011001110100000101101100011101011000110111010110011100101101011000001011100011000110110000100101110010000111000111001111011010001111000001000011111101110111001010011101110111101010110110000000111100001011001011100100001001110101111001000111111101010101001110000000001101100110011010101010000100110011110011011010010110001110000011110011110010010011100110111101010011001011100000011";
+        String qPattern = "1000001101110101101001001000011110011101100011010100101100010110000010110000000000111100001101000101010111011101101101100101010101101011111111100000111001011011110000111111010000010100001010110100101110011110000101100101111011000011100101111011011001001001111110111000010011011010100010011110000100100001101001011011101000100101010111100101110011001100010011111000011111101010001000001000101101011000101110010101101001001111010111000001111101010000111001111110011010010001001101101111000111101010010100010011110010110001100100100100110000101001010101011010010101100011111111111100111000010111110001100101111011011000100100101110111110101111011101111010101110001101101001011100110111000000100011000110111011011100000011010010111110000111101100101101001101010001101000010100110100100101111100000111001000000111101001001011001111110100111011100011001000110001000100110010101011101010100011110110110101000001100001000101110100110010111011000110111001000000001101100000110110101010110111111011101010110010100100101011110001111111";
+        for (int i = 0; i < pPattern.length(); ++i) {
+            if (pPattern.charAt(i) == '0') {
+                p.setBit(3 * 1024 + i, 0);
+            } else {
+                p.setBit(3 * 1024 + i, 1);
+            }
+
+            if (qPattern.charAt(i) == '0') {
+                q.setBit(3 * 1024 + i, 0);
+            } else {
+                q.setBit(3 * 1024 + i, 1);
+            }
+        }
 
         // the public key is a product of p and q
         publicKey = new BigNum(p);
         publicKey.multiply(q);
-        keyDialog.setVisible(false);        
+//        keyDialog.setVisible(false);        
     }
-    
+
     /**
      * Pozwól użytkownikowi wybrać plik i zwróć informacje o tym pliku.
      *
@@ -278,7 +297,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
             File outputFile = new File(fileContent.getFilePath() + "/"
                     + fileContent.getFileName().replace("_encrypted", "_decrypted.") + fileContent.getFileExtension());
-            
+
             FileUtils.writeByteArrayToFile(outputFile, decrypt(fileContent.getBinaryConent()));
             JOptionPane.showMessageDialog(this, "Plik po deszyfracji: " + outputFile.getAbsolutePath());
         } catch (IOException ex) {
@@ -289,7 +308,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 
     private byte[] cipher(byte[] bytesToEncrypt) {
         plainTextBytesLength = bytesToEncrypt.length;
-        System.out.println(plainTextBytesLength);
         converter = new BytesToBigNumsConverter(bytesToEncrypt);
         BigNum[] plainText = converter.convert();
 
@@ -307,8 +325,8 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private byte[] decrypt(byte[] toDecrypt) {
         BytesToBigNumsConverter conv = new BytesToBigNumsConverter(toDecrypt);
         BigNum[] cipherText = conv.convert();
-        
-                // Decrypt ciphertext
+
+        // Decrypt ciphertext
         BigNum exponentP = new BigNum(p);
         exponentP.add(BigNum.ONE);
         exponentP.shiftRight(2);
@@ -360,13 +378,13 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             if (counter - 1 == cipherText.length - 1) {
                 lastChunk = true;
             }
+            
             decryptedChunkBytes = BigNumsToBytesConverter.convertChunk(decryptedText[counter - 1], lastChunk);
-                System.out.println(bytesCounter);
             for (int i = 0; i < decryptedChunkBytes.length; i++) {
                 decryptedBytes[bytesCounter++] = decryptedChunkBytes[i];
             }
         }
-        
+
         return decryptedBytes;
     }
 
