@@ -1,4 +1,4 @@
-package kryptografia.gui;
+package pl.kryptografia.rabin.ui;
 
 import javax.swing.JTextArea;
 

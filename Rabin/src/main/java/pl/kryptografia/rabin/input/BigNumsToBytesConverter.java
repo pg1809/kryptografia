@@ -1,6 +1,7 @@
 package pl.kryptografia.rabin.input;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import pl.kryptografia.rabin.bignum.BigNum;
 
@@ -11,6 +12,24 @@ import pl.kryptografia.rabin.bignum.BigNum;
 public class BigNumsToBytesConverter {
 
     public static int paddedBytes;
+
+    public static byte[] bigNumArrayToBytes(BigNum[] num) {
+        List<byte[]> fragments = new ArrayList<>(num.length);
+        for (int i = 0; i < num.length; ++i) {
+            for (int j = 0; j < BigNum.BLOCKS; ++j) {
+                fragments.add(longToBytes(num[i].getBlock(j)));
+            }
+        }
+
+        byte[] array = new byte[fragments.size() * 4];
+        for (int i = 0; i < fragments.size(); ++i) {
+            for (int j = 0; j < 4; ++j) {
+                array[i * j] = fragments.get(i)[j];
+            }
+        }
+
+        return array;
+    }
 
     /**
      * Converts long value to an array of bytes (1 long = 4 bytes).

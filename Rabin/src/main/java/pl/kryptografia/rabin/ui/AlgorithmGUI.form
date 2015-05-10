@@ -9,7 +9,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="kryptografia.gui.EncryptedTextArea" name="encryptedTextArea1">
+        <Component class="pl.kryptografia.rabin.ui.EncryptedTextArea" name="encryptedTextArea1">
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
@@ -170,7 +170,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="kryptografia.gui.EncryptedTextArea" name="jTextAreaOutputText">
+        <Component class="pl.kryptografia.rabin.ui.EncryptedTextArea" name="jTextAreaOutputText">
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
