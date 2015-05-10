@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
@@ -323,8 +324,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }
 
     private byte[] decrypt(byte[] toDecrypt) {
-        BytesToBigNumsConverter conv = new BytesToBigNumsConverter(toDecrypt);
-        BigNum[] cipherText = conv.convert();
+        BigNum[] cipherText = BytesToBigNumsConverter.convertCipherTextToBigNum(toDecrypt);
 
         // Decrypt ciphertext
         BigNum exponentP = new BigNum(p);

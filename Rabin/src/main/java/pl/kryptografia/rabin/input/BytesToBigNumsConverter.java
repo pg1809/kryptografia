@@ -43,7 +43,7 @@ public class BytesToBigNumsConverter {
 //        System.out.println(BYTES_PER_CHUNK);
 //        System.out.println(k);
 //        System.out.println(newBytes);
-        
+
         if (newBytes == BYTES_PER_CHUNK) {
             newBytes = 0;
         }
@@ -135,5 +135,35 @@ public class BytesToBigNumsConverter {
         input.replaceBlock(BigNum.BLOCKS - 2, firstHashBlock);
         input.replaceBlock(BigNum.BLOCKS - 1, secondHashBlock);
         return input;
+    }
+
+    public static BigNum[] convertCipherTextToBigNum(byte[] cipherText) {
+        int hashedChunkSize = (BLOCKS_PER_CHUNK + HASH_BLOCKS) * 8;
+        int numberOfChunks = cipherText.length / hashedChunkSize;
+
+        BigNum[] converted = new BigNum[numberOfChunks];
+
+        for (int index = 0; index < numberOfChunks; ++index) {
+
+            BigNum result = new BigNum();
+
+            int currentByte = index * BYTES_PER_CHUNK;
+
+            for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS - HASH_BLOCKS; ++i) {
+                long block = 0;
+                for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
+                    // 0xFF sorcery lets us treat this byte as really unsigned
+                    block |= ((cipherText[currentByte] & 0xFF) << (24 - 8 * j));
+                    ++currentByte;
+                }
+                // if our long becomes padded with leading ones we need to extract
+                // last 32 bits
+                result.replaceBlock(i, ((block << 32) >>> 32));
+            }
+
+            converted[index] = result;
+        }
+        
+        return converted;
     }
 }
