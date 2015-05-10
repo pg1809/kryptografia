@@ -16,16 +16,17 @@ public class BigNumsToBytesConverter {
 
     public static byte[] bigNumArrayToBytes(BigNum[] num) {
         List<byte[]> fragments = new ArrayList<>(num.length);
+        
         for (int i = 0; i < num.length; ++i) {
             for (int j = BigNum.BLOCKS - BytesToBigNumsConverter.BLOCKS_PER_CHUNK - BytesToBigNumsConverter.HASH_BLOCKS; j < BigNum.BLOCKS; ++j) {
                 fragments.add(longToBytes(num[i].getBlock(j)));
             }
         }
-
+        
         byte[] array = new byte[fragments.size() * 4];
         for (int i = 0; i < fragments.size(); ++i) {
             for (int j = 0; j < 4; ++j) {
-                array[i * j] = fragments.get(i)[j];
+                array[4 * i + j] = fragments.get(i)[j];
             }
         }
         

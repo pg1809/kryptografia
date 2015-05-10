@@ -259,7 +259,9 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private void jButtonEncryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncryptTextActionPerformed
         byte[] bytesToEncrypt = jTextAreaInputText.getText().getBytes();
         byte[] encryptedBytes = cipher(bytesToEncrypt);
-
+        
+        System.out.println(Arrays.toString(encryptedBytes));
+        
         jTextAreaOutputText.setText(new String(encryptedBytes));
         jTextAreaOutputText.setInternalBuffer(encryptedBytes);
     }//GEN-LAST:event_jButtonEncryptTextActionPerformed
@@ -374,7 +376,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             tempQ.modulo(publicKey);
 
             decryptedText[counter++] = checkPossibleTexts(publicKey, tempP, tempQ);
-            System.out.println(decryptedText[counter - 1].toPrettyString());
 
             boolean lastChunk = false;
             if (counter - 1 == cipherText.length - 1) {

@@ -1,5 +1,6 @@
 package pl.kryptografia.rabin.input;
 
+import java.util.Arrays;
 import pl.kryptografia.rabin.bignum.BigNum;
 import static pl.kryptografia.rabin.bignum.BigNum.BLOCKS;
 
@@ -138,8 +139,6 @@ public class BytesToBigNumsConverter {
     }
 
     public static BigNum[] convertCipherTextToBigNum(byte[] cipherText) {
-        System.out.println(cipherText.length);
-        
         int hashedChunkSize = (BLOCKS_PER_CHUNK + HASH_BLOCKS) * 4;
         int numberOfChunks = cipherText.length / hashedChunkSize;
 
@@ -149,9 +148,9 @@ public class BytesToBigNumsConverter {
 
             BigNum result = new BigNum();
 
-            int currentByte = index * BYTES_PER_CHUNK;
+            int currentByte = index * hashedChunkSize;
 
-            for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS - HASH_BLOCKS; ++i) {
+            for (int i = BigNum.BLOCKS - (BLOCKS_PER_CHUNK + HASH_BLOCKS); i < BigNum.BLOCKS; ++i) {
                 long block = 0;
                 for (int j = 0; j < BYTES_PER_BLOCK; ++j) {
                     // 0xFF sorcery lets us treat this byte as really unsigned
