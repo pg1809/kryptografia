@@ -34,8 +34,6 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private BytesToBigNumsConverter converter;
     
     private int plainTextBytesLength;
-
-    private BigNum[] ciphered;
     
     /**
      * Creates new form AlgorithmGUI
@@ -49,7 +47,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }
 
     private void initKey() {
-        KeyDialog keyDialog = new KeyDialog(this, false);
+        KeyDialog keyDialog = new KeyDialog(this, true);
         keyDialog.setVisible(true);
         BigNum initialCandidate = new BigNum();
         initialCandidate.randomize(BigNum.BLOCKS / 4);
@@ -303,13 +301,12 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             cipherText[i].modulo(publicKey);
         }
 
-        ciphered = cipherText;
         return BigNumsToBytesConverter.bigNumArrayToBytes(cipherText);
     }
 
     private byte[] decrypt(byte[] toDecrypt) {
         BytesToBigNumsConverter conv = new BytesToBigNumsConverter(toDecrypt);
-        BigNum[] cipherText = ciphered;//conv.convert();
+        BigNum[] cipherText = conv.convert();
         
                 // Decrypt ciphertext
         BigNum exponentP = new BigNum(p);
