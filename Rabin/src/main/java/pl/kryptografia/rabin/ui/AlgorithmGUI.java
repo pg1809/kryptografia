@@ -5,14 +5,13 @@
  */
 package pl.kryptografia.rabin.ui;
 
+import java.awt.Cursor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.apache.commons.io.FileUtils;
@@ -43,13 +42,18 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         initComponents();
         setTitle("Rabin cryptosystem");
 
+        WindowUtils.centerWindow(this);
+
         jTextAreaInputText.setLineWrap(true);
         jTextAreaOutputText.setLineWrap(true);
     }
 
     private void initKey() {
         KeyDialog keyDialog = new KeyDialog(this, false);
+        WindowUtils.centerWindow(keyDialog);
         keyDialog.setVisible(true);
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
         BigNum initialCandidate = new BigNum();
         initialCandidate.randomize(BigNum.BLOCKS / 4);
         initialCandidate.setBit(BigNum.BITS - 2, 1);
@@ -79,11 +83,11 @@ public class AlgorithmGUI extends javax.swing.JFrame {
 //                q.setBit(3 * 1024 + i, 1);
 //            }
 //        }
-
         // the public key is a product of p and q
         publicKey = new BigNum(p);
         publicKey.multiply(q);
-        keyDialog.setVisible(false);        
+        keyDialog.setVisible(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
 
     /**
@@ -204,41 +208,37 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGap(0, 10, Short.MAX_VALUE)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabelInputText)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabelOutputText)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(27, 27, 27)
-                                        .addComponent(jButtonEncryptText)
-                                        .addGap(91, 91, 91)
-                                        .addComponent(jButtonDecryptText)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
-                        .addComponent(jButtonEncryptFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonDecryptFile)
-                        .addGap(50, 50, 50))))
+                    .addComponent(jLabelInputText)
+                    .addComponent(jLabelOutputText))
+                .addGap(333, 333, 333))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonEncryptFile)
+                    .addComponent(jButtonEncryptText))
+                .addGap(105, 105, 105)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonDecryptFile, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButtonDecryptText, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGap(50, 50, 50))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jScrollPane4)
+                .addGap(10, 10, 10))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jScrollPane1))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(0, 11, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonEncryptFile)
                     .addComponent(jButtonDecryptFile))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelInputText)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -259,7 +259,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     private void jButtonEncryptTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncryptTextActionPerformed
         byte[] bytesToEncrypt = jTextAreaInputText.getText().getBytes();
         byte[] encryptedBytes = cipher(bytesToEncrypt);
-        
+
         jTextAreaOutputText.setText(new String(encryptedBytes));
         jTextAreaOutputText.setInternalBuffer(encryptedBytes);
     }//GEN-LAST:event_jButtonEncryptTextActionPerformed
@@ -324,6 +324,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
     }
 
     private byte[] decrypt(byte[] toDecrypt) {
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         BigNum[] cipherText = BytesToBigNumsConverter.convertCipherTextToBigNum(toDecrypt);
 
         // Decrypt ciphertext
@@ -353,7 +354,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
         byte[] decryptedBytes = new byte[plainTextBytesLength];
         int counter = 0;
         int bytesCounter = 0;
-        
+
         for (BigNum encryptedCharacter : cipherText) {
             BigNum squareP = new BigNum(encryptedCharacter);
             squareP.powerModulo(exponentP, p);
@@ -379,13 +380,14 @@ public class AlgorithmGUI extends javax.swing.JFrame {
             if (counter - 1 == cipherText.length - 1) {
                 lastChunk = true;
             }
-            
+
             decryptedChunkBytes = BigNumsToBytesConverter.convertChunk(decryptedText[counter - 1], lastChunk);
             for (int i = 0; i < decryptedChunkBytes.length; i++) {
                 decryptedBytes[bytesCounter++] = decryptedChunkBytes[i];
             }
         }
 
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         return decryptedBytes;
     }
 
@@ -417,7 +419,7 @@ public class AlgorithmGUI extends javax.swing.JFrame {
                 return possibleText[i];
             }
         }
-        
+
         return BigNum.ZERO;
     }
 

@@ -119,7 +119,7 @@ public class PrimeSieve {
                     // we can say that a candidate is complex when we get:
                     //    remainder + 4 * k = m * p
                     // where k and m are some integers
-                    // we can take k equal ceil((p - r ) / 4)
+                    // we can take k equal ceil((p - r) / 4)
                     int step = (prime - r) / 4;
                     if ((prime - r) % 4 != 0) {
                         ++step;
