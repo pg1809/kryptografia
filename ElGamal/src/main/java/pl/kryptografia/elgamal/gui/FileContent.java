@@ -2,7 +2,6 @@ package pl.kryptografia.elgamal.gui;
 
 /**
  *
- * @author Wojciech Szałapski
  */
 public class FileContent {
 

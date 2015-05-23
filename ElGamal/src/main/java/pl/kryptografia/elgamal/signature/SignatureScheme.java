@@ -2,7 +2,6 @@ package pl.kryptografia.elgamal.signature;
 
 /**
  *
- * @author Wojciech Szałapski
  */
 public interface SignatureScheme {
 

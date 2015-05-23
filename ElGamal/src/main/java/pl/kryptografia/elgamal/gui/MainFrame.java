@@ -19,7 +19,6 @@ import pl.kryptografia.elgamal.signature.SignatureScheme;
 
 /**
  *
- * @author Lukasz Cyran
  */
 public class MainFrame extends javax.swing.JFrame {
 
@@ -122,7 +121,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButtonVerifyFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonVerifyFileActionPerformed
         FileContent inputFileContent;
         FileContent signatureFileContent;
-        
+
         try {
             inputFileContent = retrieveFileContent("Wybierz plik do sprawdzenia");
             if (inputFileContent == null) {
@@ -142,7 +141,7 @@ public class MainFrame extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Weryfikacja zakończyła się niepowodzeniem.", "Niepowodzenie", JOptionPane.WARNING_MESSAGE);
             }
-            
+
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -161,7 +160,7 @@ public class MainFrame extends javax.swing.JFrame {
                     + fileContent.getFileName() + "_signature." + fileContent.getFileExtension());
 
             FileUtils.writeByteArrayToFile(outputFile, signatureScheme.sign(fileContent.getBinaryConent()));
-            
+
             JOptionPane.showMessageDialog(this, "Plik został pomyślnie podpisany.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
