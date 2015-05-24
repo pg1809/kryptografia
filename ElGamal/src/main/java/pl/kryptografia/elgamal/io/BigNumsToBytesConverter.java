@@ -9,12 +9,20 @@ import pl.kryptografia.elgamal.bignum.BigNum;
  */
 public class BigNumsToBytesConverter {
 
-    public byte[] bigNumArrayToBytes(BigNum[] num) {
-        List<byte[]> fragments = new ArrayList<>(num.length);
+    /**
+     * Converts an array of big integers to an array of bytes.
+     * 
+     * Only the least significant half of the blocks is used in each BigNum.
+     * 
+     * @param numbers An array of BigNums.
+     * @return Corresponding array of bytes.
+     */
+    public byte[] bigNumArrayToBytes(BigNum[] numbers) {
+        List<byte[]> fragments = new ArrayList<>(numbers.length);
         
-        for (int i = 0; i < num.length; ++i) {
+        for (int i = 0; i < numbers.length; ++i) {
             for (int j = BigNum.BLOCKS / 2; j < BigNum.BLOCKS; ++j) {
-                fragments.add(longToBytes(num[i].getBlock(j)));
+                fragments.add(longToBytes(numbers[i].getBlock(j)));
             }
         }
         

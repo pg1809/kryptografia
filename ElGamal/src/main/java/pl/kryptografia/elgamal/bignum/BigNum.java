@@ -49,7 +49,7 @@ public class BigNum {
      * BigNum representing 1.
      */
     public static final BigNum ONE = new BigNum(1);
-    
+
     /**
      * BigNum representing 2.
      */
@@ -328,12 +328,12 @@ public class BigNum {
 
         pool.close();
     }
-    
+
     /**
      * Returns the greates common divisor of this number and x.
-     * 
+     *
      * This number should be non negative for this method to work properly.
-     * 
+     *
      * @param x A non negative number.
      */
     public void gcd(BigNum x) {
@@ -344,14 +344,14 @@ public class BigNum {
             b = a;
             a = temp;
         }
-        
+
         while (b.absGreaterThan(BigNum.ZERO)) {
             BigNum temp = new BigNum(a);
             a = b;
             temp.modulo(b);
             b = temp;
         }
-        
+
         copyBlockwise(a);
     }
 
@@ -663,6 +663,24 @@ public class BigNum {
         copyBlockwise(BigNum.ZERO);
         number[firstBlock + 1] = extractLast32Bits(initialValue);
         number[firstBlock] = (initialValue >>> 32);
+    }
+
+    /**
+     * Initializes this big num from given binary string.
+     *
+     * Bits are initialized starting from the most significant one if given
+     * binary string is shorter than number of bits in BigNum.
+     *
+     * @param binaryString
+     */
+    public void initializeFromBinaryString(String binaryString) {
+        for (int i = 0; i < binaryString.length(); ++i) {
+            if (binaryString.charAt(i) == '0') {
+                setBit(i, 0);
+            } else {
+                setBit(i, 1);
+            }
+        }
     }
 
     /**
