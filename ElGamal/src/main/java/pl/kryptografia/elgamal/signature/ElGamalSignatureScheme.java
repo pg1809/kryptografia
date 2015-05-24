@@ -1,6 +1,10 @@
 package pl.kryptografia.elgamal.signature;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pl.kryptografia.elgamal.bignum.BigNum;
 import pl.kryptografia.elgamal.calculation.EuclideanSolver;
 import pl.kryptografia.elgamal.io.BigNumsToBytesConverter;
@@ -107,20 +111,6 @@ public class ElGamalSignatureScheme implements SignatureScheme {
             return false;
         }
 
-//        BigInteger R = bi(r);
-//        BigInteger S = bi(s);
-//        BigInteger Y = bi(publicKey.y);
-//        BigInteger P = bi(publicKey.prime);
-//        BigInteger G = bi(publicKey.generator);
-//        
-//        BigInteger V1 = Y.modPow(R, P).multiply(R.modPow(S, P)).mod(P);
-//        BigInteger V2 = G.modPow(bi(hash(originalMessage)), P);
-//        
-//        System.out.println(V1);
-//        System.out.println(V2);
-//        
-//        System.out.println(V1.equals(V2));
-
         BigNum exponentY = new BigNum(publicKey.y);
         exponentY.powerModulo(r, publicKey.prime);
 
@@ -138,6 +128,18 @@ public class ElGamalSignatureScheme implements SignatureScheme {
     }
 
     private BigNum hash(byte[] originalMessage) {
-        return new BigNum(2342379329066671238L, BigNum.BLOCKS - 2);
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] digest = messageDigest.digest(originalMessage);
+            byte[] paddedDigest = new byte[BytesToBigNumsConverter.BYTES_PER_BIGNUM];
+            for (int i = 0; i < digest.length; ++i) {
+                paddedDigest[paddedDigest.length - digest.length + i] = digest[i];
+            }
+            return toBigNumsConverter.convert(paddedDigest)[0];
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(ElGamalSignatureScheme.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return null;
     }
 }

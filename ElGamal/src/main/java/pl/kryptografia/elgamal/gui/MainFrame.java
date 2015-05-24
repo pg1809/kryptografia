@@ -20,7 +20,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 
-    private SignatureScheme signatureScheme = new ElGamalSignatureScheme();
+    private final SignatureScheme signatureScheme = new ElGamalSignatureScheme();
 
     /**
      * Creates new form MainFrame
@@ -134,7 +134,8 @@ public class MainFrame extends javax.swing.JFrame {
             byte[] originalMessage = inputFileContent.getBinaryConent();
             byte[] signature = signatureFileContent.getBinaryConent();
 
-            if (signatureScheme.verify(originalMessage, signature)) {
+            boolean verificationStatus = signatureScheme.verify(originalMessage, signature);
+            if (verificationStatus) {
                 JOptionPane.showMessageDialog(this, "Weryfikacja zakończyła się powodzeniem.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "Weryfikacja zakończyła się niepowodzeniem.", "Niepowodzenie", JOptionPane.WARNING_MESSAGE);

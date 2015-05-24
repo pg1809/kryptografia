@@ -11,7 +11,7 @@ public class BytesToBigNumsConverter {
     
     private final static int BYTES_PER_BLOCK = 4;
     
-    private final static int BYTES_PER_BIGNUM = BLOCKS_PER_BIGNUM * BYTES_PER_BLOCK;
+    public final static int BYTES_PER_BIGNUM = BLOCKS_PER_BIGNUM * BYTES_PER_BLOCK;
     
     /**
      * Converts input bytes to an array of big integers.
