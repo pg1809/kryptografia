@@ -1,5 +1,6 @@
 package pl.kryptografia.elgamal.gui;
 
+import java.awt.Cursor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -117,6 +118,8 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonVerifyFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonVerifyFileActionPerformed
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        
         FileContent inputFileContent;
         FileContent signatureFileContent;
 
@@ -145,9 +148,13 @@ public class MainFrame extends javax.swing.JFrame {
             logger.log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku.", "Błąd", JOptionPane.ERROR_MESSAGE);
         }
+        
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }//GEN-LAST:event_jButtonVerifyFileActionPerformed
 
     private void jButtonSignFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSignFileActionPerformed
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        
         FileContent fileContent;
         try {
             fileContent = retrieveFileContent("Wybierz plik do podpisania");
@@ -156,7 +163,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
 
             File outputFile = new File(fileContent.getFilePath() + "/"
-                    + fileContent.getFileName() + "_signature." + fileContent.getFileExtension());
+                    + fileContent.getFileName() + "." + fileContent.getFileExtension() + ".signature");
 
             FileUtils.writeByteArrayToFile(outputFile, signatureScheme.sign(fileContent.getBinaryConent()));
 
@@ -165,6 +172,8 @@ public class MainFrame extends javax.swing.JFrame {
             logger.log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Wystąpił błąd podczas wczytywania pliku.", "Błąd", JOptionPane.ERROR_MESSAGE);
         }
+        
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }//GEN-LAST:event_jButtonSignFileActionPerformed
 
     /**
