@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pl.kryptografia.elgamal.gui;
 
 import java.io.File;
@@ -15,6 +10,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import pl.kryptografia.elgamal.signature.ElGamalSignatureScheme;
 import pl.kryptografia.elgamal.signature.SignatureScheme;
 
 /**
@@ -24,7 +20,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 
-    private SignatureScheme signatureScheme;
+    private SignatureScheme signatureScheme = new ElGamalSignatureScheme();
 
     /**
      * Creates new form MainFrame
@@ -55,9 +51,11 @@ public class MainFrame extends javax.swing.JFrame {
             result.setFileName(FilenameUtils.getBaseName(file.getAbsolutePath()));
             result.setFileExtension(FilenameUtils.getExtension(file.getAbsolutePath()));
 
-            FileInputStream fis = new FileInputStream(file);
-            byte[] binaryContent = new byte[(int) file.length()];
-            fis.read(binaryContent);
+            byte[] binaryContent;
+            try (FileInputStream fis = new FileInputStream(file)) {
+                binaryContent = new byte[(int) file.length()];
+                fis.read(binaryContent);
+            }
 
             result.setBinaryConent(binaryContent);
             return result;

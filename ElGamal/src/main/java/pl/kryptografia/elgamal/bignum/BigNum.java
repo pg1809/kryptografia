@@ -20,7 +20,7 @@ public class BigNum {
      * = 1024 bits, 64 blocks = 2048 bits, 128 blocks = 4096 bits, 256 blocks =
      * 8192 bits
      */
-    public static final int BLOCKS = 16;
+    public static final int BLOCKS = 128;
 
     /**
      * Number of bits in one BigNum.
@@ -327,6 +327,32 @@ public class BigNum {
         }
 
         pool.close();
+    }
+    
+    /**
+     * Returns the greates common divisor of this number and x.
+     * 
+     * This number should be non negative for this method to work properly.
+     * 
+     * @param x A non negative number.
+     */
+    public void gcd(BigNum x) {
+        BigNum a = new BigNum(this);
+        BigNum b = new BigNum(x);
+        if (b.absGreaterThan(a)) {
+            BigNum temp = new BigNum(b);
+            b = a;
+            a = temp;
+        }
+        
+        while (b.absGreaterThan(BigNum.ZERO)) {
+            BigNum temp = new BigNum(a);
+            a = b;
+            temp.modulo(b);
+            b = temp;
+        }
+        
+        copyBlockwise(a);
     }
 
     public boolean isDivisible(BigNum divisor) {

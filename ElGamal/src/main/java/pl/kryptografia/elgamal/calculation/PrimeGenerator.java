@@ -68,7 +68,9 @@ public class PrimeGenerator {
                 b.powerModulo(exponentQ, p);
 
                 if (!b.equals(BigNum.ONE)) {
-                    return new Pair(p, new BigNum(generator, BigNum.BLOCKS - 2));
+                    BigNum boxedGenerator = new BigNum(generator, BigNum.BLOCKS - 2);
+                    boxedGenerator.modulo(p);
+                    return new Pair(p, boxedGenerator);
                 }
             }
         }

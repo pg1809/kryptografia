@@ -12,6 +12,21 @@ public class EuclideanSolver {
     }
 
     /**
+     * Calculates inverse of x modulo given number.
+     * 
+     * Numbers should be coprime.
+     * 
+     * @param x Number to find the inverse of.
+     * @param modulus Modulus.
+     * @return x^(-1) mod modulus
+     */
+    public BigNum inverseModulo(BigNum x, BigNum modulus) {
+        BigNum result = solve(x, modulus).first;
+        result.modulo(modulus);
+        return result;
+    }
+    
+    /**
      * For given relatively prime big numbers a and b returns a pair (s, t) such
      * that sa + tb = 1.
      *
